@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState } from "react";
 
 export default function Home() {
@@ -94,37 +95,18 @@ export default function Home() {
         uploadFormData.append("images", img);
       });
 
-      const uploadRes = await fetch("/api/upload_images", {
+      // Step 2: Send image URLs to design API
+      const videoDocument = await fetch("/api/generate_video", {
         method: "POST",
         body: uploadFormData,
       });
 
-      if (!uploadRes.ok) {
-        throw new Error("Failed to upload images to storage");
-      }
-
-      const uploadData = await uploadRes.json();
-      const imageUrls = uploadData.imageUrls;
-
-      // Step 2: Send image URLs to design API
-      const designRes = await fetch(
-        "/api/generate_social_media_content_design",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ imageUrls }),
-        },
-      );
-
-      if (!designRes.ok) {
+      if (!videoDocument.ok) {
         throw new Error("Failed to generate design");
       }
-
-      const designData = await designRes.json();
-      setDesign(designData.design);
-      console.log(designData.design);
+      const videoResult = await videoDocument.json();
+      setDesign(videoResult.result);
+      console.log(videoResult.result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
