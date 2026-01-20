@@ -1,317 +1,217 @@
 import React from "react";
-import { Player } from "@remotion/player";
 import {
+  AbsoluteFill,
   Sequence,
-  useCurrentFrame,
-  interpolate,
   Img,
   Html5Audio,
+  useCurrentFrame,
   useVideoConfig,
-  AbsoluteFill,
+  interpolate,
+  spring,
 } from "remotion";
 
-// --- Asset URLs ---
-const assets = {
-  images: {
-    img1: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768780614488-grgb7sj.jpg",
-    img2: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768780614990-w3qj5dh.jpg",
-    img3: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768780615235-j214lvs.jpg",
-  },
-  voiceovers: {
-    vo1: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/a6cc0946-c7c0-42ab-8608-ef219f722cca.wav",
-    vo2: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/9644cc09-5317-4744-97b4-925a1fbfdeb9.wav",
-    vo3: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/534455fe-c66b-4f28-abf9-eb1eb7c0cd9d.wav",
-    vo4: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/67a177c7-d0bb-4ab4-b2a0-5ad5cf0460d4.wav",
-    vo5: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/c81f2507-26ea-45ff-984f-54d212509601.wav",
-    vo6: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/57484870-fff3-4219-89e8-77ef7f352ead.wav",
-  },
-};
+export const MyAnimation = () => {
+  const assets = {
+    images: {
+      img1: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768940103094-3x51cic.jpg",
+      img2: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768940103977-xq4qjc8.jpg",
+      img3: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768940105310-wrlyhpv.jpg",
+    },
+    voiceovers: {
+      vo1: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/ebc3fa00-c0f4-4162-9053-7162ce336710.wav",
+      vo2: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/29edc480-8c87-407f-a588-91e44020d413.wav",
+      vo3: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/ae8ccb1d-a55e-4601-b7a6-41a4f8906588.wav",
+      vo4: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/e70ebf44-825d-4dd0-9c40-0bc525ad42f1.wav",
+      vo5: "https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/497040de-e818-47cc-9b67-718bfac4163e.wav",
+    },
+  };
 
-// --- Project Settings ---
-const VIDEO_WIDTH = 320;
-const VIDEO_HEIGHT = 550;
-const VIDEO_FPS = 30;
-const TOTAL_DURATION_IN_SECONDS = 18;
-const TOTAL_DURATION_IN_FRAMES = TOTAL_DURATION_IN_SECONDS * VIDEO_FPS;
+  const Scene1 = () => {
+    const frame = useCurrentFrame();
+    const { durationInFrames } = useVideoConfig();
 
-// Helper to convert seconds to frames for timing accuracy
-const s = (seconds: number) => seconds * VIDEO_FPS;
+    const translateX = interpolate(frame, [0, 120], [20, -20]);
 
-// --- Scene Components ---
-
-// Scene 1: 0.0s – 3.5s
-const Scene1: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  const scale = interpolate(frame, [0, durationInFrames], [1.2, 1.5]);
-
-  return (
-    <AbsoluteFill>
-      <Sequence from={s(0.2)}>
-        <Html5Audio src={assets.voiceovers.vo1} />
-      </Sequence>
-      <Img
-        src={assets.images.img1}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          objectPosition: "center center",
-          transform: `scale(${scale})`,
-        }}
-      />
-    </AbsoluteFill>
-  );
-};
-
-// Scene 2: 3.5s – 7.0s
-const Scene2: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  // Pan from left to right across the image.
-  // Image is 180% wide (320 * 1.8 = 576px). Extra width is 256px.
-  // TranslateX from 0 to -256 moves the image left, creating a rightward pan effect.
-  const translateX = interpolate(frame, [0, durationInFrames], [0, -256]);
-
-  return (
-    <AbsoluteFill style={{ overflow: "hidden" }}>
-      <Sequence from={s(0.2)}>
-        <Html5Audio src={assets.voiceovers.vo2} />
-      </Sequence>
-      <Img
-        src={assets.images.img2}
-        style={{
-          position: "absolute",
-          width: "180%",
-          height: "auto",
-          // Vertically position to focus on the bottom two shelves
-          top: "-25%",
-          transform: `translateX(${translateX}px)`,
-        }}
-      />
-    </AbsoluteFill>
-  );
-};
-
-// Scene 3: 7.0s – 9.5s
-const Scene3: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  // Pan from right to left across the image.
-  // Image is 200% wide (320 * 2 = 640px). Extra width is 320px.
-  // TranslateX from -320 to 0 moves the image right, creating a leftward pan effect.
-  const translateX = interpolate(frame, [0, durationInFrames], [-320, 0]);
-
-  return (
-    <AbsoluteFill style={{ overflow: "hidden" }}>
-      <Sequence from={s(0.2)}>
-        <Html5Audio src={assets.voiceovers.vo3} />
-      </Sequence>
-      <Img
-        src={assets.images.img3}
-        style={{
-          position: "absolute",
-          width: "200%",
-          height: "auto",
-          // Vertically position to focus on the top shelf of coffee bags
-          top: "5%",
-          transform: `translateX(${translateX}px)`,
-        }}
-      />
-    </AbsoluteFill>
-  );
-};
-
-// Scene 4: 9.5s – 13.0s
-const Scene4: React.FC = () => {
-  const frame = useCurrentFrame();
-  const { durationInFrames } = useVideoConfig();
-
-  // Fast zoom-out from 250% to 150%
-  const scale = interpolate(frame, [0, durationInFrames], [2.5, 1.5]);
-
-  return (
-    <AbsoluteFill>
-      <Sequence from={s(0.2)}>
-        <Html5Audio src={assets.voiceovers.vo4} />
-      </Sequence>
-      <Img
-        src={assets.images.img3}
-        style={{
-          width: "100%",
-          height: "100%",
-          objectFit: "cover",
-          // Focus on ZADIG sauces on the middle shelf
-          objectPosition: "center 60%",
-          transform: `scale(${scale})`,
-        }}
-      />
-    </AbsoluteFill>
-  );
-};
-
-// Scene 5: 13.0s – 15.5s (Rapid Cuts Montage)
-const Scene5: React.FC = () => {
-  return (
-    <AbsoluteFill>
-      <Sequence from={s(0.2)}>
-        <Html5Audio src={assets.voiceovers.vo5} />
-      </Sequence>
-
-      {/* 13.0s-13.8s: Close-up on "Soya Rice" */}
-      <Sequence from={0} durationInFrames={s(0.8)}>
+    return (
+      <AbsoluteFill style={{ backgroundColor: "white" }}>
         <Img
           src={assets.images.img1}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            objectPosition: "50% 35%",
-            transform: "scale(3.5)",
+            objectPosition: "right center",
+            transform: `translateX(${translateX}px)`,
+            transformOrigin: "center center",
           }}
         />
-      </Sequence>
+      </AbsoluteFill>
+    );
+  };
 
-      {/* 13.8s-14.6s: Close-up on red beans */}
-      <Sequence from={s(0.8)} durationInFrames={s(0.8)}>
+  const Scene2 = () => {
+    const frame = useCurrentFrame();
+    const { durationInFrames } = useVideoConfig(); // Duration of the sequence
+
+    // Entrance Transition: Wipe Right
+    const wipeProgress = interpolate(frame, [0, 15], [100, 0], {
+      extrapolateRight: "clamp",
+    });
+
+    // Main Animation: Ken Burns
+    const scale = interpolate(frame, [0, 135], [1.0, 1.15]);
+    const translateY = interpolate(frame, [0, 135], [0, -30]);
+
+    return (
+      <AbsoluteFill style={{ clipPath: `inset(0 ${wipeProgress}% 0 0)` }}>
         <Img
           src={assets.images.img2}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            objectPosition: "center center",
-            transform: "scale(2.5)",
+            objectPosition: "center 20%",
+            transformOrigin: "center 80%",
+            transform: `scale(${scale}) translateY(${translateY}px)`,
           }}
         />
-      </Sequence>
+      </AbsoluteFill>
+    );
+  };
 
-      {/* 14.6s-15.5s: Close-up on spice jars */}
-      <Sequence from={s(1.6)} durationInFrames={s(0.9)}>
+  const Scene3 = () => {
+    const frame = useCurrentFrame();
+    const { fps, height } = useVideoConfig();
+
+    // Entrance Transition: Slide Down
+    const slideIn = spring({
+      frame,
+      fps,
+      from: -height,
+      to: 0,
+      durationInFrames: 18,
+    });
+
+    // Main Animation: Zoom In
+    const scale = interpolate(frame, [0, 120], [1.0, 1.2]);
+
+    return (
+      <AbsoluteFill style={{ transform: `translateY(${slideIn}px)` }}>
         <Img
           src={assets.images.img3}
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            objectPosition: "50% 85%",
-            transform: "scale(3)",
+            objectPosition: "center 35%",
+            transformOrigin: "center 35%",
+            transform: `scale(${scale})`,
           }}
         />
-      </Sequence>
-    </AbsoluteFill>
-  );
-};
+      </AbsoluteFill>
+    );
+  };
 
-// Scene 6: 15.5s – 18.0s (Call to Action)
-const Scene6: React.FC = () => {
-  const frame = useCurrentFrame();
+  const Scene4 = () => {
+    const frame = useCurrentFrame();
 
-  // Fade-in from 15.5s to 16.0s (0 to 0.5s into the sequence)
-  const opacity = interpolate(frame, [0, s(0.5)], [0, 1], {
-    extrapolateRight: "clamp",
-  });
+    // Entrance Transition: Iris (Expand)
+    const irisRadius = interpolate(frame, [0, 15], [0, 150], {
+      extrapolateRight: "clamp",
+    });
 
-  const textStyle: React.CSSProperties = {
-    fontFamily: "sans-serif",
-    color: "white",
-    textAlign: "center",
-    position: "absolute",
-    left: "50%",
-    transform: "translateX(-50%)",
-    width: "90%",
+    // Main Animation: Tilt
+    const yPos = interpolate(frame, [0, 105], [80, 40]);
+
+    return (
+      <AbsoluteFill style={{ clipPath: `circle(${irisRadius}% at center)` }}>
+        <Img
+          src={assets.images.img1}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: `center ${yPos}%`,
+            transformOrigin: "center center",
+          }}
+        />
+      </AbsoluteFill>
+    );
+  };
+
+  const Scene5 = () => {
+    const frame = useCurrentFrame();
+
+    // Entrance Transition: Fade
+    const opacity = interpolate(frame, [0, 20], [0, 1], {
+      extrapolateRight: "clamp",
+    });
+
+    // Text Animation: Fade In
+    const textOpacity = interpolate(frame, [0, 30], [0, 1], {
+      extrapolateRight: "clamp",
+    });
+
+    return (
+      <AbsoluteFill style={{ opacity, backgroundColor: "black" }}>
+        <Img
+          src={assets.images.img2}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            filter: "blur(20px)",
+            opacity: 0.7,
+          }}
+        />
+        <AbsoluteFill
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            color: "white",
+            fontFamily: "sans-serif",
+            textAlign: "center",
+            opacity: textOpacity,
+          }}
+        >
+          <div style={{ fontSize: "120px", fontWeight: "bold" }}>
+            YOUR STORE NAME
+          </div>
+          <div style={{ fontSize: "80px", margin: "20px 0" }}>
+            123 Main Street
+          </div>
+          <div style={{ fontSize: "60px", fontStyle: "italic" }}>
+            Great Products, Great Prices.
+          </div>
+        </AbsoluteFill>
+      </AbsoluteFill>
+    );
   };
 
   return (
-    <AbsoluteFill style={{ backgroundColor: "#A0522D", opacity }}>
-      <Sequence from={s(0.2)}>
-        <Html5Audio src={assets.voiceovers.vo6} />
-      </Sequence>
-
-      <div
-        style={{
-          ...textStyle,
-          top: "40%",
-          fontSize: "48px",
-          fontWeight: "bold",
-          zIndex: 3,
-        }}
-      >
-        [YOUR STORE NAME]
-      </div>
-      <div
-        style={{
-          ...textStyle,
-          top: "55%",
-          fontSize: "24px",
-          fontWeight: "400",
-          zIndex: 2,
-        }}
-      >
-        Your One-Stop Shop for Authentic Groceries
-      </div>
-      <div
-        style={{
-          ...textStyle,
-          top: "85%",
-          fontSize: "18px",
-          fontWeight: "300",
-          zIndex: 1,
-        }}
-      >
-        [Store Address / Website Here]
-      </div>
-    </AbsoluteFill>
-  );
-};
-
-// --- Main Video Component ---
-const FlavorVideo: React.FC = () => {
-  return (
     <AbsoluteFill style={{ backgroundColor: "black" }}>
-      <Sequence from={s(0)} durationInFrames={s(3.5)}>
+      <Sequence from={0} durationInFrames={120}>
+        <Html5Audio src={assets.voiceovers.vo1} />
         <Scene1 />
       </Sequence>
-      <Sequence from={s(3.5)} durationInFrames={s(3.5)}>
+      <Sequence from={120} durationInFrames={135}>
+        <Html5Audio src={assets.voiceovers.vo2} />
         <Scene2 />
       </Sequence>
-      <Sequence from={s(7.0)} durationInFrames={s(2.5)}>
+      <Sequence from={255} durationInFrames={120}>
+        <Html5Audio src={assets.voiceovers.vo3} />
         <Scene3 />
       </Sequence>
-      <Sequence from={s(9.5)} durationInFrames={s(3.5)}>
+      <Sequence from={375} durationInFrames={105}>
+        <Html5Audio src={assets.voiceovers.vo4} />
         <Scene4 />
       </Sequence>
-      <Sequence from={s(13.0)} durationInFrames={s(2.5)}>
+      <Sequence from={480} durationInFrames={120}>
+        <Html5Audio src={assets.voiceovers.vo5} />
         <Scene5 />
-      </Sequence>
-      <Sequence from={s(15.5)} durationInFrames={s(2.5)}>
-        <Scene6 />
       </Sequence>
     </AbsoluteFill>
   );
-};
-
-// --- Player Root Component ---
-const playerProps = {
-  component: FlavorVideo,
-  durationInFrames: TOTAL_DURATION_IN_FRAMES,
-  compositionWidth: VIDEO_WIDTH,
-  compositionHeight: VIDEO_HEIGHT,
-  fps: VIDEO_FPS,
-  style: {
-    width: "100%",
-    maxWidth: `${VIDEO_WIDTH}px`,
-    aspectRatio: `${VIDEO_WIDTH} / ${VIDEO_HEIGHT}`,
-    display: "block",
-    margin: "auto",
-  },
-  controls: true,
-  loop: true,
-};
-
-export const RemotionRoot: React.FC = () => {
-  return <Player {...playerProps} />;
 };

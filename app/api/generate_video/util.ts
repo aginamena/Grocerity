@@ -1,4 +1,4 @@
-import { generateText, ToolLoopAgent, tool } from "ai";
+import { generateText, ToolLoopAgent, tool, Output } from "ai";
 import { generateCode, generateScript } from "./promts";
 import { supabase } from "@/lib/supabase";
 import { GoogleGenAI } from '@google/genai';
@@ -8,6 +8,14 @@ export async function generateRemotionCode(design: string) {
     const {text} = await generateText({
         model: "google/gemini-2.5-pro",
         system: generateCode,
+        output: Output.object({
+          schema: z.object({
+                     code: z.string().describe("The complete remotion code implementing the design"),
+            durationInFrames: z.number().describe("Total duration of the video in frames"),
+            fps: z.number().describe("Frames per second of the video"),
+          
+        })
+        }),
         prompt: `Write the remotion code given the design: \n\n ${design}`,
     })
     return text;

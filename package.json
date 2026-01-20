@@ -9,14 +9,19 @@
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.12",
+    "@babel/standalone": "^7.28.6",
     "@google/genai": "^1.37.0",
+    "@remotion/lottie": "^4.0.407",
     "@remotion/player": "^4.0.407",
+    "@remotion/three": "^4.0.407",
+    "@remotion/transitions": "^4.0.407",
     "@supabase/supabase-js": "^2.90.1",
     "ai": "^6.0.39",
     "next": "15.5.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "remotion": "^4.0.407",
+    "three": "^0.182.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {
