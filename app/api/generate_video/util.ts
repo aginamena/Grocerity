@@ -12,7 +12,6 @@ export async function generateRemotionCode(design: string) {
           schema: z.object({
                      code: z.string().describe("The complete remotion code implementing the design"),
             durationInFrames: z.number().describe("Total duration of the video in frames"),
-            fps: z.number().describe("Frames per second of the video"),
           
         })
         }),
@@ -45,12 +44,12 @@ export async function AddVoiceoverURLsAndImageURLsToDesign(design: string, image
     const {text} = await agent.generate({
       prompt : `
       You are given:
-    - A design script that may contain one or more voiceover scripts
+    - A design script that will contain one voiceover script
     - An array of image URLs
     
     Your task is to:
-    1. Identify every voiceover script in the design.
-    2. For each voiceover script, call the tool convertVoiceoverToPublicUrl using the script text to generate a public voiceover URL.
+    1. Identify the voiceover script in the design.
+    2. Call the tool convertVoiceoverToPublicUrl using the script text to generate a public voiceover URL.
     3. Add the generated public voiceover URL directly next to the corresponding voiceover script.
     4. Add the correct image URL directly next to each image reference in the design.
     
@@ -62,7 +61,7 @@ export async function AddVoiceoverURLsAndImageURLsToDesign(design: string, image
     
     Output requirements:
     - Return the complete design script.
-    - Each voiceover script must include its public voiceover URL.
+    - The voiceover script must include its public voiceover URL.
     - Each image reference must include its image URL.
     - Preserve the original wording and structure of the design as much as possible, only adding URLs where required.
     
@@ -73,7 +72,7 @@ export async function AddVoiceoverURLsAndImageURLsToDesign(design: string, image
     [Image URL: https://...]
     
     Voiceover Script (Text):
-    (0.5s–2.8s) "Looking to restock your pantry?"
+    (0.5s–2.8s) "Welcome to our FoodMart, are you looking to restock your pantry?..."
     [Voiceover URL: https://...]
     
     Inputs:

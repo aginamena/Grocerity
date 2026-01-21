@@ -1,21 +1,59 @@
 "use client";
 
-import React, { useState } from "react";
-import { RemotionRoot } from "./Y";
-import { extractComponentCode } from "./util";
 import { compileCode } from "@/lib/remotion/compiler";
+import confetti from "canvas-confetti";
+import {
+  CloudUpload,
+  Delete,
+  Description,
+  Download,
+  PhotoLibrary,
+  PlayCircle,
+  VideoCall,
+  FileDownload,
+} from "@mui/icons-material";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardMedia,
+  CircularProgress,
+  Container,
+  Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Paper,
+  TextField,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import { Player } from "@remotion/player";
+import React, { useState, useEffect } from "react";
+import { extractComponentCode } from "./util";
 import { MyAnimation } from "./Y";
 
 export default function Home() {
+  const theme = useTheme();
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const isTablet = useMediaQuery("(max-width:900px)");
+
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [design, setDesign] = useState<string>("");
-  const [Component, setComponent] = useState<React.ComponentType | null>(null);
+  const [design, setDesign] = useState<{
+    code?: string;
+    durationInFrames?: number;
+    fps?: number;
+  } | null>(null);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
-  // Function to compress image
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve) => {
       const reader = new FileReader();
@@ -56,7 +94,7 @@ export default function Home() {
               resolve(compressedFile);
             },
             "image/jpeg",
-            0.7, // 70% quality
+            0.7,
           );
         };
       };
@@ -70,7 +108,6 @@ export default function Home() {
       return;
     }
 
-    // Compress all images before adding
     const compressedFiles = await Promise.all(files.map(compressImage));
     const newImages = [...selectedImages, ...compressedFiles];
     setSelectedImages(newImages);
@@ -90,40 +127,67 @@ export default function Home() {
       return;
     }
 
+    if (!prompt.trim()) {
+      setError("Please describe your video.");
+      return;
+    }
+    setImagePreviews([]);
+    setPrompt("");
     setLoading(true);
     setError(null);
-    setDesign("");
 
     try {
-      // Step 1: Upload images to Supabase
       const uploadFormData = new FormData();
       selectedImages.forEach((img) => {
         uploadFormData.append("images", img);
       });
+      uploadFormData.append("prompt", prompt);
 
-      // Step 2: Send image URLs to design API
-      // const request = await fetch("/api/generate_video", {
-      //   method: "POST",
-      //   body: uploadFormData,
-      // });
+      const request = await fetch("/api/generate_video", {
+        method: "POST",
+        body: uploadFormData,
+      });
 
-      // if (!request.ok) {
-      //   throw new Error("Failed to generate design");
-      // }
-      // const response = await request.json();
-      // let finalCode = response.result;
-      let finalCode = j.code;
-      // Remove code block markers if present
-      finalCode = finalCode.replace(/^```(?:tsx?|jsx?)?\n?/, "");
+      if (!request.ok) {
+        throw new Error("Failed to generate design");
+      }
+      const response = await request.json();
+      const parsedResponse = JSON.parse(response.result);
+      let finalCode = parsedResponse.code.replace(/^```(?:tsx?|jsx?)?\n?/, "");
       finalCode = finalCode.replace(/\n?```\s*$/, "");
       finalCode = extractComponentCode(finalCode);
 
-      // const compilationResult = compileCode(codeAsString); // Validate code compiles
-      // console.log("Compilation result:", compilationResult);
+      sessionStorage.setItem("createdCode", finalCode.toString());
+      sessionStorage.setItem(
+        "durationInFrames",
+        parsedResponse.durationInFrames?.toString() || "150",
+      );
 
-      // setComponent(compilationResult.Component);
+      // 🎉 Trigger confetti celebration
+      confetti({
+        particleCount: 150,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#8b5cf6", "#a855f7", "#d946ef", "#4ade80", "#38bdf8"],
+      });
 
-      console.log(finalCode);
+      // Fire confetti from both sides for extra celebration
+      setTimeout(() => {
+        confetti({
+          particleCount: 100,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0 },
+          colors: ["#8b5cf6", "#a855f7", "#d946ef"],
+        });
+        confetti({
+          particleCount: 100,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1 },
+          colors: ["#8b5cf6", "#a855f7", "#d946ef"],
+        });
+      }, 250);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
@@ -131,95 +195,599 @@ export default function Home() {
     }
   }
 
+  function Component(): React.ComponentType {
+    const code = sessionStorage.getItem("createdCode");
+    const compilationResult = compileCode(code || "");
+    return compilationResult.Component ?? (() => null);
+  }
+
+  const steps = [
+    {
+      icon: <PhotoLibrary />,
+      text: "Upload the images of the products you sell in the store",
+    },
+    {
+      icon: <Description />,
+      text: "Give a clear description of the video you want to create",
+    },
+    {
+      icon: <PlayCircle />,
+      text: "Click the Generate Video button to start creating your video",
+    },
+    {
+      icon: <Download />,
+      text: "Watch your created video and download it to post on social media",
+    },
+  ];
+
+  // Highlighted text styles
+  const highlightStyles = {
+    stopWasting: {
+      color: "#f87171",
+      fontWeight: 700,
+    },
+    generate: {
+      color: "#a855f7",
+      fontWeight: 700,
+    },
+    postConsistently: {
+      color: "#38bdf8",
+      fontWeight: 700,
+    },
+    growSales: {
+      color: "#4ade80",
+      fontWeight: 700,
+    },
+  };
+
+  // Responsive video player dimensions
+  const getVideoPlayerSize = () => {
+    if (isMobile) {
+      return { width: 280, height: 480 };
+    }
+    return { width: 320, height: 550 };
+  };
+
+  const videoSize = getVideoPlayerSize();
+
+  const loadingMessages = [
+    {
+      text: "You stop wasting time thinking of what videos to create for social media.",
+      color: "#f87171",
+    },
+    {
+      text: "You generate professional short-form videos to advertise your grocery store.",
+      color: "#a855f7",
+    },
+    {
+      text: "Our videos increase your sales and grow your audience!",
+      color: "#4ade80",
+    },
+  ];
+
+  // Cycle through loading messages
+  useEffect(() => {
+    if (!loading) {
+      setLoadingMessageIndex(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [loading]);
+
   return (
-    <div style={{ padding: 20, maxWidth: 900, margin: "0 auto" }}>
-      <h1>Video Generation with Multiple Product Images</h1>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        background:
+          "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)",
+        py: { xs: 3, sm: 4, md: 6 },
+        px: { xs: 2, sm: 0 },
+      }}
+    >
+      <Container maxWidth="md">
+        {/* Hero Section */}
+        <Box sx={{ textAlign: "center", mb: { xs: 3, sm: 4, md: 5 } }}>
+          <Typography
+            variant={isMobile ? "h4" : "h3"}
+            component="h1"
+            fontWeight="bold"
+            gutterBottom
+            sx={{
+              background:
+                "linear-gradient(90deg, #8b5cf6 0%, #a855f7 50%, #d946ef 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              lineHeight: 1.2,
+              mb: { xs: 2, md: 3 },
+              fontSize: { xs: "1.75rem", sm: "2.25rem", md: "3rem" },
+            }}
+          >
+            Create Short-Form Videos to Get More Sales for Your Grocery Store
+          </Typography>
+          <Typography
+            variant={isMobile ? "body1" : "h6"}
+            sx={{
+              color: "rgba(255, 255, 255, 0.7)",
+              maxWidth: 700,
+              mx: "auto",
+              lineHeight: { xs: 1.7, md: 1.9 },
+              fontWeight: 400,
+              fontSize: { xs: "0.95rem", sm: "1rem", md: "1.25rem" },
+              px: { xs: 1, sm: 2, md: 0 },
+            }}
+          >
+            <Box component="span" sx={highlightStyles.stopWasting}>
+              Stop wasting time
+            </Box>{" "}
+            thinking of what videos to create for social media.{" "}
+            <Box component="span" sx={highlightStyles.generate}>
+              Generate professional short-form videos
+            </Box>{" "}
+            and{" "}
+            <Box component="span" sx={highlightStyles.postConsistently}>
+              post consistently
+            </Box>{" "}
+            to{" "}
+            <Box component="span" sx={highlightStyles.growSales}>
+              increase sales and grow your audience
+            </Box>
+            !
+          </Typography>
+        </Box>
 
-      <input
-        type="file"
-        multiple
-        accept="image/*"
-        onChange={handleImageChange}
-        disabled={loading}
-      />
-
-      {imagePreviews.length > 0 && (
-        <div
-          style={{ display: "flex", gap: 12, flexWrap: "wrap", marginTop: 16 }}
-        >
-          {imagePreviews.map((src, i) => (
-            <div key={i} style={{ position: "relative" }}>
-              <img
-                src={src}
-                style={{ width: 120, height: 120, objectFit: "cover" }}
-              />
-              <button
-                onClick={() => removeImage(i)}
-                style={{
-                  position: "absolute",
-                  top: 4,
-                  right: 4,
-                  background: "red",
-                  color: "white",
-                  borderRadius: "50%",
-                  border: "none",
-                  width: 24,
-                  height: 24,
-                }}
-              >
-                ✕
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
-
-      <button
-        onClick={generateDesign}
-        disabled={loading || selectedImages.length === 0}
-        style={{ marginTop: 20 }}
-      >
-        {loading ? "Generating…" : "Generate Video Design"}
-      </button>
-
-      {design && (
-        <pre
-          style={{
-            whiteSpace: "pre-wrap",
-            marginTop: 24,
-            background: "#111",
-            color: "#0f0",
-            padding: 16,
+        {/* How It Works Section */}
+        <Paper
+          elevation={6}
+          sx={{
+            p: { xs: 2, sm: 3 },
+            mb: { xs: 3, md: 4 },
+            borderRadius: { xs: 2, md: 3 },
+            background: "rgba(26, 26, 46, 0.6)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(139, 92, 246, 0.15)",
           }}
         >
-          {design}
-        </pre>
-      )}
+          <Typography
+            variant={isMobile ? "h6" : "h5"}
+            fontWeight="600"
+            sx={{
+              color: "#e2e8f0",
+              mb: 2,
+              textAlign: "center",
+            }}
+          >
+            How It Works
+          </Typography>
+          <List sx={{ py: 0 }}>
+            {steps.map((step, index) => (
+              <ListItem
+                key={index}
+                sx={{
+                  py: { xs: 1, sm: 1.5 },
+                  px: { xs: 1, sm: 2 },
+                  borderRadius: 2,
+                  mb: 1,
+                  flexDirection: { xs: "row" },
+                  alignItems: { xs: "flex-start", sm: "center" },
+                  "&:hover": {
+                    backgroundColor: "rgba(139, 92, 246, 0.08)",
+                  },
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: { xs: 40, sm: 48 },
+                    mt: { xs: 0.5, sm: 0 },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: { xs: 32, sm: 36 },
+                      height: { xs: 32, sm: 36 },
+                      borderRadius: "50%",
+                      background:
+                        "linear-gradient(135deg, #8b5cf6 0%, #a855f7 100%)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      fontSize: { xs: "1rem", sm: "1.2rem" },
+                    }}
+                  >
+                    {step.icon}
+                  </Box>
+                </ListItemIcon>
+                <ListItemText
+                  primary={step.text}
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.85)",
+                    fontWeight: 500,
+                    fontSize: { xs: "0.875rem", sm: "1rem" },
+                  }}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </Paper>
 
-      <Player
-        component={MyAnimation}
-        durationInFrames={y.durationInFrames}
-        compositionWidth={320}
-        compositionHeight={550}
-        fps={y.fps}
-        controls
-        loop
-        acknowledgeRemotionLicense
-      />
-    </div>
+        {/* Main Card */}
+        <Paper
+          elevation={10}
+          sx={{
+            p: { xs: 2.5, sm: 3, md: 4 },
+            borderRadius: { xs: 3, md: 4 },
+            background: "rgba(26, 26, 46, 0.8)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(139, 92, 246, 0.2)",
+          }}
+        >
+          {/* Image Upload Section */}
+          <Typography
+            variant={isMobile ? "subtitle1" : "h6"}
+            fontWeight="600"
+            gutterBottom
+            sx={{ color: "#e2e8f0" }}
+          >
+            Upload Your Images
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              mb: 2,
+              color: "rgba(255, 255, 255, 0.5)",
+              fontSize: { xs: "0.8rem", sm: "0.875rem" },
+            }}
+          >
+            Select up to 10 images for your video (JPG, PNG, WebP)
+          </Typography>
+
+          <Button
+            component="label"
+            variant="outlined"
+            startIcon={<CloudUpload />}
+            disabled={loading}
+            fullWidth={isMobile}
+            sx={{
+              mb: 3,
+              py: { xs: 1.2, sm: 1.5 },
+              px: { xs: 3, sm: 4 },
+              borderStyle: "dashed",
+              borderWidth: 2,
+              borderColor: "rgba(139, 92, 246, 0.5)",
+              color: "#a855f7",
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+              "&:hover": {
+                borderStyle: "dashed",
+                borderWidth: 2,
+                borderColor: "#8b5cf6",
+                backgroundColor: "rgba(139, 92, 246, 0.1)",
+              },
+            }}
+          >
+            Choose Images
+            <input
+              type="file"
+              hidden
+              multiple
+              accept="image/*"
+              onChange={handleImageChange}
+            />
+          </Button>
+
+          {/* Image Previews */}
+          {imagePreviews.length > 0 && (
+            <Grid
+              container
+              spacing={{ xs: 1, sm: 2 }}
+              sx={{ mb: { xs: 3, md: 4 } }}
+            >
+              {imagePreviews.map((src, i) => (
+                <Grid size={{ xs: 4, sm: 3, md: 2 }} key={i}>
+                  <Card
+                    sx={{
+                      position: "relative",
+                      backgroundColor: "#16213e",
+                      border: "1px solid rgba(139, 92, 246, 0.3)",
+                      borderRadius: { xs: 1.5, sm: 2 },
+                      overflow: "hidden",
+                      "&:hover .delete-btn": { opacity: 1 },
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={src}
+                      alt={`Preview ${i + 1}`}
+                      sx={{
+                        height: { xs: 80, sm: 100 },
+                        objectFit: "cover",
+                      }}
+                    />
+                    <IconButton
+                      className="delete-btn"
+                      size="small"
+                      onClick={() => removeImage(i)}
+                      sx={{
+                        position: "absolute",
+                        top: { xs: 2, sm: 4 },
+                        right: { xs: 2, sm: 4 },
+                        bgcolor: "#ef4444",
+                        color: "white",
+                        opacity: { xs: 1, sm: 0.8 },
+                        transition: "opacity 0.2s",
+                        padding: { xs: "4px", sm: "8px" },
+                        "&:hover": {
+                          bgcolor: "#dc2626",
+                          opacity: 1,
+                        },
+                      }}
+                    >
+                      <Delete sx={{ fontSize: { xs: 16, sm: 20 } }} />
+                    </IconButton>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )}
+
+          {/* Prompt Input */}
+          <Typography
+            variant={isMobile ? "subtitle1" : "h6"}
+            fontWeight="600"
+            gutterBottom
+            sx={{ color: "#e2e8f0" }}
+          >
+            Describe Your Video
+          </Typography>
+          <TextField
+            fullWidth
+            multiline
+            rows={isMobile ? 3 : 4}
+            placeholder="E.g., Create a high-energy video ad showcasing these products with dynamic transitions and upbeat music. Include a call-to-action to visit our store..."
+            value={prompt}
+            onChange={(e) => setPrompt(e.target.value)}
+            disabled={loading}
+            sx={{
+              mb: 3,
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "rgba(22, 33, 62, 0.6)",
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                "& fieldset": {
+                  borderColor: "rgba(139, 92, 246, 0.3)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "rgba(139, 92, 246, 0.5)",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#8b5cf6",
+                },
+              },
+              "& .MuiInputBase-input": {
+                color: "#e2e8f0",
+              },
+              "& .MuiInputBase-input::placeholder": {
+                color: "rgba(255, 255, 255, 0.4)",
+                opacity: 1,
+              },
+            }}
+          />
+
+          {/* Error Alert */}
+          {error && (
+            <Alert
+              severity="error"
+              sx={{
+                mb: 3,
+                backgroundColor: "rgba(239, 68, 68, 0.1)",
+                border: "1px solid rgba(239, 68, 68, 0.3)",
+                color: "#fca5a5",
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+                "& .MuiAlert-icon": {
+                  color: "#f87171",
+                },
+              }}
+            >
+              {error}
+            </Alert>
+          )}
+
+          {/* Generate Button */}
+          <Button
+            variant="contained"
+            size={isMobile ? "medium" : "large"}
+            fullWidth
+            onClick={generateDesign}
+            disabled={loading || selectedImages.length === 0}
+            startIcon={
+              loading ? (
+                <CircularProgress size={isMobile ? 18 : 20} color="inherit" />
+              ) : (
+                <VideoCall />
+              )
+            }
+            sx={{
+              py: { xs: 1.5, sm: 1.8 },
+              fontSize: { xs: "0.95rem", sm: "1.1rem" },
+              fontWeight: "bold",
+              background: "linear-gradient(45deg, #8b5cf6 30%, #a855f7 90%)",
+              boxShadow: "0 4px 20px rgba(139, 92, 246, 0.4)",
+              "&:hover": {
+                background: "linear-gradient(45deg, #7c3aed 30%, #9333ea 90%)",
+                boxShadow: "0 6px 25px rgba(139, 92, 246, 0.5)",
+              },
+              "&:disabled": {
+                background: "rgba(100, 100, 100, 0.3)",
+                color: "rgba(255, 255, 255, 0.3)",
+              },
+            }}
+          >
+            {loading ? "Generating Your Video..." : "Generate Video"}
+          </Button>
+
+          {/* Loading Value Propositions */}
+          {loading && (
+            <Box
+              sx={{
+                mt: 4,
+                p: { xs: 2, sm: 3 },
+                borderRadius: 3,
+                background: "rgba(139, 92, 246, 0.08)",
+                border: "1px solid rgba(139, 92, 246, 0.2)",
+                textAlign: "center",
+              }}
+            >
+              <Typography
+                variant="subtitle2"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.6)",
+                  mb: 2,
+                  fontWeight: 500,
+                }}
+              >
+                At Grocerity, we make sure that...
+              </Typography>
+              <Box
+                sx={{
+                  minHeight: { xs: 60, sm: 50 },
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Typography
+                  variant={isMobile ? "body1" : "h6"}
+                  sx={{
+                    color: loadingMessages[loadingMessageIndex].color,
+                    fontWeight: 600,
+                    transition: "all 0.5s ease-in-out",
+                    animation: "fadeInUp 0.5s ease-out",
+                    "@keyframes fadeInUp": {
+                      "0%": {
+                        opacity: 0,
+                        transform: "translateY(10px)",
+                      },
+                      "100%": {
+                        opacity: 1,
+                        transform: "translateY(0)",
+                      },
+                    },
+                  }}
+                  key={loadingMessageIndex}
+                >
+                  {loadingMessages[loadingMessageIndex].text}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: 1,
+                  mt: 2,
+                }}
+              >
+                {loadingMessages.map((_, index) => (
+                  <Box
+                    key={index}
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      backgroundColor:
+                        index === loadingMessageIndex
+                          ? loadingMessages[loadingMessageIndex].color
+                          : "rgba(255, 255, 255, 0.3)",
+                      transition: "all 0.3s ease",
+                    }}
+                  />
+                ))}
+              </Box>
+            </Box>
+          )}
+
+          {/* Video Player */}
+          {!loading && sessionStorage.getItem("createdCode") && (
+            <Box sx={{ mt: { xs: 3, md: 4 }, textAlign: "center" }}>
+              <Typography
+                variant={isMobile ? "subtitle1" : "h6"}
+                fontWeight="600"
+                gutterBottom
+                sx={{ color: "#e2e8f0" }}
+              >
+                Your Generated Video
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  borderRadius: 2,
+                  overflow: "hidden",
+                  boxShadow: "0 4px 30px rgba(139, 92, 246, 0.3)",
+                  border: "1px solid rgba(139, 92, 246, 0.3)",
+                  mx: "auto",
+                  maxWidth: "fit-content",
+                }}
+              >
+                <Player
+                  component={Component()}
+                  durationInFrames={parseInt(
+                    sessionStorage.getItem("durationInFrames") || "150",
+                  )}
+                  compositionWidth={videoSize.width}
+                  compositionHeight={videoSize.height}
+                  fps={30}
+                  controls
+                  loop
+                  acknowledgeRemotionLicense
+                />
+              </Box>
+
+              <Button
+                variant="contained"
+                size={isMobile ? "medium" : "large"}
+                startIcon={<FileDownload />}
+                sx={{
+                  py: { xs: 1.2, sm: 1.5 },
+                  px: { xs: 4, sm: 5 },
+                  mt: { xs: 2.5, sm: 3 },
+                  fontSize: { xs: "0.95rem", sm: "1.1rem" },
+                  fontWeight: "bold",
+                  background:
+                    "linear-gradient(45deg, #4ade80 30%, #22c55e 90%)",
+                  boxShadow: "0 4px 20px rgba(74, 222, 128, 0.3)",
+                  "&:hover": {
+                    background:
+                      "linear-gradient(45deg, #22c55e 30%, #16a34a 90%)",
+                    boxShadow: "0 6px 25px rgba(74, 222, 128, 0.4)",
+                    transform: "translateY(-2px)",
+                  },
+                  transition: "all 0.2s ease",
+                }}
+              >
+                Download Video
+              </Button>
+            </Box>
+          )}
+        </Paper>
+
+        {/* Footer */}
+        <Typography
+          variant="body2"
+          sx={{
+            textAlign: "center",
+            mt: { xs: 3, md: 5 },
+            color: "rgba(255, 255, 255, 0.5)",
+            fontStyle: "italic",
+            fontSize: { xs: "0.875rem", sm: "1rem" },
+          }}
+        >
+          Grocerity is made with love ❤️
+        </Typography>
+      </Container>
+    </Box>
   );
 }
-
-const y = {
-  code: "import React from 'react';\nimport { AbsoluteFill, Sequence, Img, useCurrentFrame, interpolate } from 'remotion';\n\nexport const MyAnimation = () => {\n  const assets = {\n    images: {\n      aisle1: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768878259321-zhoqeoh.jpg',\n      aisle2: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768878260267-vg3f7lt.jpg',\n    },\n  };\n\n  const Scene1 = () => {\n    const frame = useCurrentFrame();\n    const durationInFrames = 4 * 30;\n\n    const scale = interpolate(frame, [0, durationInFrames], [1.2, 1.6]);\n    const opacity = interpolate(frame, [0, 15, 114, 120], [0, 1, 1, 0], {\n      extrapolateLeft: 'clamp',\n      extrapolateRight: 'clamp',\n    });\n\n    return (\n      <AbsoluteFill style={{ justifyContent: 'center', alignItems: 'center' }}>\n        <Img\n          src={assets.images.aisle1}\n          style={{\n            width: '100%',\n            height: 'auto',\n            transform: `scale(${scale})`,\n            opacity: opacity,\n          }}\n        />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene2 = () => {\n    const frame = useCurrentFrame();\n    const durationInFrames = 4 * 30;\n\n    const panY = interpolate(frame, [0, durationInFrames], [50, -150]);\n    const opacity = interpolate(frame, [0, 6, 114, 120], [0, 1, 1, 0], {\n      extrapolateLeft: 'clamp',\n      extrapolateRight: 'clamp',\n    });\n\n    return (\n      <AbsoluteFill style={{ opacity }}>\n        <Img\n          src={assets.images.aisle1}\n          style={{\n            position: 'absolute',\n            width: '150%',\n            height: 'auto',\n            left: '50%',\n            top: '50%',\n            transform: `translate(-50%, -50%) translateY(${panY}px)`,\n          }}\n        />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene3 = () => {\n    const frame = useCurrentFrame();\n    const durationInFrames = 3.5 * 30;\n\n    const panX = interpolate(frame, [0, durationInFrames], [-40, 40]);\n    const verticalOffset = -150;\n    const fadeInOpacity = interpolate(frame, [0, 6], [0, 1], {\n      extrapolateRight: 'clamp',\n    });\n    const slideY = interpolate(frame, [99, 105], [0, -550], {\n      extrapolateLeft: 'clamp',\n      extrapolateRight: 'clamp',\n    });\n\n    return (\n      <AbsoluteFill style={{ opacity: fadeInOpacity, transform: `translateY(${slideY}px)` }}>\n        <Img\n          src={assets.images.aisle2}\n          style={{\n            position: 'absolute',\n            width: '140%',\n            height: 'auto',\n            left: '50%',\n            top: '50%',\n            transform: `translate(-50%, -50%) translateX(${panX}px) translateY(${verticalOffset}px)`,\n          }}\n        />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene4 = () => {\n    const frame = useCurrentFrame();\n    \n    const slideY = interpolate(frame, [0, 6], [550, 0], {\n      extrapolateLeft: 'clamp',\n      extrapolateRight: 'clamp',\n    });\n    const scale = interpolate(frame, [6, 126], [1, 1.3], {\n      extrapolateLeft: 'clamp',\n      extrapolateRight: 'clamp',\n    });\n    const opacity = interpolate(frame, [135, 141], [1, 0], {\n      extrapolateLeft: 'clamp',\n    });\n\n    return (\n      <AbsoluteFill style={{ transform: `translateY(${slideY}px)`, opacity }}>\n        <Img\n          src={assets.images.aisle2}\n          style={{\n            width: '100%',\n            height: '100%',\n            objectFit: 'cover',\n            transformOrigin: 'center 75%',\n            transform: `scale(${scale})`,\n          }}\n        />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene5 = () => {\n    const frame = useCurrentFrame();\n    const opacity = interpolate(frame, [0, 15, 114, 120], [0, 1, 1, 0], {\n      extrapolateLeft: 'clamp',\n      extrapolateRight: 'clamp',\n    });\n\n    return (\n      <AbsoluteFill style={{ opacity }}>\n        <Img\n          src={assets.images.aisle1}\n          style={{\n            width: '100%',\n            height: '100%',\n            objectFit: 'cover',\n            filter: 'blur(8px)',\n          }}\n        />\n      </AbsoluteFill>\n    );\n  };\n\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'black' }}>\n      <Sequence from={0} durationInFrames={120}>\n        <Scene1 />\n      </Sequence>\n      <Sequence from={120} durationInFrames={120}>\n        <Scene2 />\n      </Sequence>\n      <Sequence from={339} durationInFrames={141}>\n        <Scene4 />\n      </Sequence>\n      <Sequence from={240} durationInFrames={105}>\n        <Scene3 />\n      </Sequence>\n      <Sequence from={480} durationInFrames={120}>\n        <Scene5 />\n      </Sequence>\n    </AbsoluteFill>\n  );\n};",
-  durationInFrames: 600,
-  fps: 30,
-};
-
-const j = {
-  code: "import React from 'react';\nimport { AbsoluteFill, Sequence, Img, Html5Audio, useCurrentFrame, useVideoConfig, interpolate, spring } from 'remotion';\n\nexport const MyAnimation = () => {\n  const assets = {\n    images: {\n      img1: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768940103094-3x51cic.jpg',\n      img2: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768940103977-xq4qjc8.jpg',\n      img3: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1768940105310-wrlyhpv.jpg',\n    },\n    voiceovers: {\n      vo1: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/ebc3fa00-c0f4-4162-9053-7162ce336710.wav',\n      vo2: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/29edc480-8c87-407f-a588-91e44020d413.wav',\n      vo3: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/ae8ccb1d-a55e-4601-b7a6-41a4f8906588.wav',\n      vo4: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/e70ebf44-825d-4dd0-9c40-0bc525ad42f1.wav',\n      vo5: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/497040de-e818-47cc-9b67-718bfac4163e.wav',\n    },\n  };\n\n  const Scene1 = () => {\n    const frame = useCurrentFrame();\n    const { durationInFrames } = useVideoConfig();\n\n    const translateX = interpolate(frame, [0, 120], [20, -20]);\n\n    return (\n      <AbsoluteFill style={{ backgroundColor: 'white' }}>\n        <Img\n          src={assets.images.img1}\n          style={{\n            width: '100%',\n            height: '100%',\n            objectFit: 'cover',\n            objectPosition: 'right center',\n            transform: `translateX(${translateX}px)`,\n            transformOrigin: 'center center',\n          }}\n        />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene2 = () => {\n    const frame = useCurrentFrame();\n    const { durationInFrames } = useVideoConfig(); // Duration of the sequence\n\n    // Entrance Transition: Wipe Right\n    const wipeProgress = interpolate(frame, [0, 15], [100, 0], { extrapolateRight: 'clamp' });\n\n    // Main Animation: Ken Burns\n    const scale = interpolate(frame, [0, 135], [1.0, 1.15]);\n    const translateY = interpolate(frame, [0, 135], [0, -30]);\n\n    return (\n      <AbsoluteFill style={{ clipPath: `inset(0 ${wipeProgress}% 0 0)` }}>\n        <Img\n          src={assets.images.img2}\n          style={{\n            width: '100%',\n            height: '100%',\n            objectFit: 'cover',\n            objectPosition: 'center 20%',\n            transformOrigin: 'center 80%',\n            transform: `scale(${scale}) translateY(${translateY}px)`,\n          }}\n        />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene3 = () => {\n    const frame = useCurrentFrame();\n    const { fps, height } = useVideoConfig();\n\n    // Entrance Transition: Slide Down\n    const slideIn = spring({\n      frame,\n      fps,\n      from: -height,\n      to: 0,\n      durationInFrames: 18,\n    });\n\n    // Main Animation: Zoom In\n    const scale = interpolate(frame, [0, 120], [1.0, 1.2]);\n\n    return (\n      <AbsoluteFill style={{ transform: `translateY(${slideIn}px)` }}>\n        <Img\n          src={assets.images.img3}\n          style={{\n            width: '100%',\n            height: '100%',\n            objectFit: 'cover',\n            objectPosition: 'center 35%',\n            transformOrigin: 'center 35%',\n            transform: `scale(${scale})`,\n          }}\n        />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene4 = () => {\n    const frame = useCurrentFrame();\n\n    // Entrance Transition: Iris (Expand)\n    const irisRadius = interpolate(frame, [0, 15], [0, 150], { extrapolateRight: 'clamp' });\n\n    // Main Animation: Tilt\n    const yPos = interpolate(frame, [0, 105], [80, 40]);\n\n    return (\n      <AbsoluteFill style={{ clipPath: `circle(${irisRadius}% at center)` }}>\n        <Img\n          src={assets.images.img1}\n          style={{\n            width: '100%',\n            height: '100%',\n            objectFit: 'cover',\n            objectPosition: `center ${yPos}%`,\n            transformOrigin: 'center center',\n          }}\n        />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene5 = () => {\n    const frame = useCurrentFrame();\n\n    // Entrance Transition: Fade\n    const opacity = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: 'clamp' });\n\n    // Text Animation: Fade In\n    const textOpacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: 'clamp' });\n\n    return (\n      <AbsoluteFill style={{ opacity, backgroundColor: 'black' }}>\n        <Img\n          src={assets.images.img2}\n          style={{\n            width: '100%',\n            height: '100%',\n            objectFit: 'cover',\n            filter: 'blur(20px)',\n            opacity: 0.7,\n          }}\n        />\n        <AbsoluteFill\n          style={{\n            display: 'flex',\n            flexDirection: 'column',\n            justifyContent: 'center',\n            alignItems: 'center',\n            color: 'white',\n            fontFamily: 'sans-serif',\n            textAlign: 'center',\n            opacity: textOpacity,\n          }}\n        >\n          <div style={{ fontSize: '120px', fontWeight: 'bold' }}>YOUR STORE NAME</div>\n          <div style={{ fontSize: '80px', margin: '20px 0' }}>123 Main Street</div>\n          <div style={{ fontSize: '60px', fontStyle: 'italic' }}>Great Products, Great Prices.</div>\n        </AbsoluteFill>\n      </AbsoluteFill>\n    );\n  };\n\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'black' }}>\n      <Sequence from={0} durationInFrames={120}>\n        <Html5Audio src={assets.voiceovers.vo1} />\n        <Scene1 />\n      </Sequence>\n      <Sequence from={120} durationInFrames={135}>\n        <Html5Audio src={assets.voiceovers.vo2} />\n        <Scene2 />\n      </Sequence>\n      <Sequence from={255} durationInFrames={120}>\n        <Html5Audio src={assets.voiceovers.vo3} />\n        <Scene3 />\n      </Sequence>\n      <Sequence from={375} durationInFrames={105}>\n        <Html5Audio src={assets.voiceovers.vo4} />\n        <Scene4 />\n      </Sequence>\n      <Sequence from={480} durationInFrames={120}>\n        <Html5Audio src={assets.voiceovers.vo5} />\n        <Scene5 />\n      </Sequence>\n    </AbsoluteFill>\n  );\n};",
-  durationInFrames: 600,
-  fps: 30,
-};
