@@ -29,7 +29,6 @@ import {
   TextField,
   Typography,
   useMediaQuery,
-  useTheme,
 } from "@mui/material";
 import { Player } from "@remotion/player";
 import confetti from "canvas-confetti";
@@ -37,7 +36,6 @@ import React, { useEffect, useState } from "react";
 import { extractComponentCode } from "./util";
 
 export default function Home() {
-  const theme = useTheme();
   const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(max-width:900px)");
 
@@ -45,12 +43,9 @@ export default function Home() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hasGeneratedVideo, setHasGeneratedVideo] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [design, setDesign] = useState<{
-    code?: string;
-    durationInFrames?: number;
-    fps?: number;
-  } | null>(null);
+
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
   const compressImage = (file: File): Promise<File> => {
@@ -148,7 +143,7 @@ export default function Home() {
       });
 
       if (!request.ok) {
-        throw new Error("Failed to generate design");
+        throw new Error("Failed to generate video");
       }
       const response = await request.json();
       const parsedResponse = JSON.parse(response.result);
@@ -161,6 +156,7 @@ export default function Home() {
         "durationInFrames",
         parsedResponse.durationInFrames?.toString() || "150",
       );
+      setHasGeneratedVideo(true);
 
       // 🎉 Trigger confetti celebration
       confetti({
@@ -195,6 +191,7 @@ export default function Home() {
   }
 
   function Component(): React.ComponentType {
+    if (typeof window === "undefined") return () => null;
     const code = sessionStorage.getItem("createdCode");
     const compilationResult = compileCode(code || "");
     return compilationResult.Component ?? (() => null);
@@ -277,6 +274,16 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, [loading]);
+
+  // Check for existing video on client mount
+  useEffect(() => {
+    if (
+      typeof window !== "undefined" &&
+      sessionStorage.getItem("createdCode")
+    ) {
+      setHasGeneratedVideo(true);
+    }
+  }, []);
 
   return (
     <Box
@@ -501,7 +508,6 @@ export default function Home() {
                     <CardMedia
                       component="img"
                       image={src}
-                      alt={`Preview ${i + 1}`}
                       sx={{
                         height: { xs: 80, sm: 100 },
                         objectFit: "cover",
@@ -709,7 +715,7 @@ export default function Home() {
           )}
 
           {/* Video Player */}
-          {!loading && sessionStorage.getItem("createdCode") && (
+          {!loading && hasGeneratedVideo && (
             <Box sx={{ mt: { xs: 3, md: 4 }, textAlign: "center" }}>
               <Typography
                 variant={isMobile ? "subtitle1" : "h6"}
