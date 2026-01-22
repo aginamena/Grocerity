@@ -1,16 +1,15 @@
 "use client";
 
 import { compileCode } from "@/lib/remotion/compiler";
-import confetti from "canvas-confetti";
 import {
   CloudUpload,
   Delete,
   Description,
   Download,
+  FileDownload,
   PhotoLibrary,
   PlayCircle,
   VideoCall,
-  FileDownload,
 } from "@mui/icons-material";
 import {
   Alert,
@@ -33,9 +32,9 @@ import {
   useTheme,
 } from "@mui/material";
 import { Player } from "@remotion/player";
-import React, { useState, useEffect } from "react";
+import confetti from "canvas-confetti";
+import React, { useEffect, useState } from "react";
 import { extractComponentCode } from "./util";
-import { MyAnimation } from "./Y";
 
 export default function Home() {
   const theme = useTheme();
