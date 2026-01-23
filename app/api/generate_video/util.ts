@@ -1,7 +1,8 @@
 import { generateText, ToolLoopAgent, tool, Output } from "ai";
 import { generateCode, generateScript } from "./promts";
 import { supabase } from "@/lib/supabase";
-import { GoogleGenAI } from '@google/genai';
+import { experimental_generateSpeech as generateSpeech } from "ai";
+import {openai} from "@ai-sdk/openai";
 import { z } from "zod";
 
 export async function generateRemotionCode(design: string) {
@@ -28,9 +29,9 @@ export async function AddVoiceoverURLsAndImageURLsToDesign(design: string, image
               description: "Get the public url of a voiceover script.",
               inputSchema: z.object({
                 sceneScript: z.string().describe("The voiceover script for the scene"),
-                voiceName: z.string().optional().describe("Voice name (e.g., 'Kore', 'Aoede')"),
+                voiceName: z.string().optional().describe("Voice name (e.g. alloy, echo, fable, onyx, nova, shimmer)"),
               }),
-              execute: async ({ sceneScript, voiceName = 'Kore' }: { sceneScript: string; voiceName?: string }) => {
+              execute: async ({ sceneScript, voiceName = 'alloy' }: { sceneScript: string; voiceName?: string }) => {
                 const voiceoverUrl = await convertVoiceoverToPublicUrl(sceneScript, voiceName);
                 return {
            
@@ -135,76 +136,51 @@ export async function uploadImages(files: File[]){
         return uploadedUrls;
 }
 
-async function convertVoiceoverToPublicUrl(script: string, voiceName: string = 'Kore'): Promise<string> {
+
+async function convertVoiceoverToPublicUrl(
+  script: string,
+  voiceName: string = "alloy"
+): Promise<string> {
   try {
-    const ai = new GoogleGenAI({});
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash-preview-tts',
-      contents: [{ parts: [{ text: script }] }],
-      config: {
-        responseModalities: ['AUDIO'],
-        speechConfig: {
-          voiceConfig: {
-            prebuiltVoiceConfig: { voiceName },
-          },
-        },
-      },
+    // 1. Generate speech (already WAV)
+    const response = await generateSpeech({
+      model: openai.speech("gpt-4o-mini-tts"),
+      text: script,
+      voice: voiceName,
+      outputFormat: "wav",
     });
+    const wavBuffer = Buffer.from(response.audio.uint8Array);
 
-    const part = response.candidates?.[0]?.content?.parts?.[0];
-    const audioData = part?.inlineData?.data;
-
-    if (!audioData) {
-      throw new Error('No audio returned from Gemini');
-    }
-
-    const pcmBuffer = Buffer.from(audioData, 'base64');
-    const wavBuffer = pcmToWav(pcmBuffer, 24000);
-
-    // Upload to Supabase
+    // 2. Upload to Supabase
     const filePath = `voiceovers/${crypto.randomUUID()}.wav`;
 
     const { error } = await supabase.storage
-      .from('audios')
+      .from("audios")
       .upload(filePath, wavBuffer, {
-        contentType: 'audio/wav',
+        contentType: "audio/wav",
         upsert: false,
       });
 
-    if (error) throw error;
+    if (error) {
+      throw error;
+    }
 
+    // 3. Get public URL
     const { data } = supabase.storage
-      .from('audios')
+      .from("audios")
       .getPublicUrl(filePath);
+
+    if (!data?.publicUrl) {
+      throw new Error("Failed to retrieve public URL");
+    }
 
     return data.publicUrl;
   } catch (err) {
-    console.error('convertVoiceoverToPublicUrl error:', err);
-    throw new Error(`Failed to generate voiceover: ${err instanceof Error ? err.message : 'Unknown error'}`);
+    console.error("convertVoiceoverToPublicUrl error:", err);
+    throw new Error(
+      `Failed to generate voiceover: ${
+        err instanceof Error ? err.message : "Unknown error"
+      }`
+    );
   }
-}
-
-function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000) {
-  const numChannels = 1;
-  const bitsPerSample = 16;
-  const byteRate = sampleRate * numChannels * bitsPerSample / 8;
-  const blockAlign = numChannels * bitsPerSample / 8;
-
-  const wavHeader = Buffer.alloc(44);
-
-  wavHeader.write('RIFF', 0);
-  wavHeader.writeUInt32LE(36 + pcmBuffer.length, 4);
-  wavHeader.write('WAVE', 8);
-  wavHeader.write('fmt ', 12);
-  wavHeader.writeUInt32LE(16, 16);
-  wavHeader.writeUInt16LE(1, 20); // PCM
-  wavHeader.writeUInt16LE(numChannels, 22);
-  wavHeader.writeUInt32LE(sampleRate, 24);
-  wavHeader.writeUInt32LE(byteRate, 28);
-  wavHeader.writeUInt16LE(blockAlign, 32);
-  wavHeader.writeUInt16LE(bitsPerSample, 34);
-  wavHeader.write('data', 36);
-  wavHeader.writeUInt32LE(pcmBuffer.length, 40);
-
-  return Buffer.concat([wavHeader, pcmBuffer]);
 }
