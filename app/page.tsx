@@ -279,15 +279,15 @@ export default function Home() {
 
   const loadingMessages = [
     {
-      text: "You stop wasting time thinking of what videos to create for social media.",
+      text: "Spend less time planning content and more time growing your business",
       color: "#f87171",
     },
     {
-      text: "You generate professional short-form videos to advertise your grocery store.",
+      text: "Generate professional product videos in seconds",
       color: "#a855f7",
     },
     {
-      text: "Our videos increase your sales and grow your audience!",
+      text: "Grow your audience and increase sales through short-form video",
       color: "#4ade80",
     },
   ];
@@ -345,7 +345,7 @@ export default function Home() {
               fontSize: { xs: "1.75rem", sm: "2.25rem", md: "3rem" },
             }}
           >
-            Create Short-Form Videos to Get More Sales for Your Grocery Store
+            Create short videos to promote your grocery products on social media
           </Typography>
           <Typography
             variant={isMobile ? "body1" : "h6"}
@@ -360,21 +360,15 @@ export default function Home() {
             }}
           >
             <Box component="span" sx={highlightStyles.stopWasting}>
-              Stop wasting time
+              Stop wasting time deciding what to post.
             </Box>{" "}
-            thinking of what videos to create for social media.{" "}
             <Box component="span" sx={highlightStyles.generate}>
-              Generate professional short-form videos
+              Instantly generate professional short-form videos
             </Box>{" "}
-            and{" "}
-            <Box component="span" sx={highlightStyles.postConsistently}>
-              post consistently
-            </Box>{" "}
-            to{" "}
+            showcasing your products to{" "}
             <Box component="span" sx={highlightStyles.growSales}>
-              increase sales and grow your audience
+              boost awareness, increase sales, and grow your audience!
             </Box>
-            !
           </Typography>
         </Box>
 
