@@ -279,15 +279,15 @@ export default function Home() {
 
   const loadingMessages = [
     {
-      text: "Spend less time planning content and more time growing your business",
+      text: "You spend less time planning content and more time growing your business",
       color: "#f87171",
     },
     {
-      text: "Generate professional product videos in seconds",
+      text: "You generate professional product videos in seconds",
       color: "#a855f7",
     },
     {
-      text: "Grow your audience and increase sales through short-form video",
+      text: "You grow your audience and increase sales through short-form video",
       color: "#4ade80",
     },
   ];
@@ -679,7 +679,7 @@ export default function Home() {
                   fontWeight: 500,
                 }}
               >
-                At Grocerity, we make sure that...
+                At Grocerity, our mission is to make sure that...
               </Typography>
               <Box
                 sx={{
