@@ -8,7 +8,6 @@ import {
   useVideoConfig,
   spring,
   Sequence,
-  Html5Audio,
   Img
 } from "remotion";
 import * as RemotionShapes from "@remotion/shapes";
@@ -25,6 +24,7 @@ import { slide } from "@remotion/transitions/slide";
 import { wipe } from "@remotion/transitions/wipe";
 import { flip } from "@remotion/transitions/flip";
 import { clockWipe } from "@remotion/transitions/clock-wipe";
+import {Audio} from "@remotion/media";
 
 export interface CompilationResult {
   Component: React.ComponentType | null;
@@ -85,7 +85,7 @@ export function compileCode(code: string): CompilationResult {
 
     const createComponent = new Function(
       "React",
-      "Html5Audio",
+      "Audio",
       "Img",
       "Remotion",
       "RemotionShapes",
@@ -132,7 +132,7 @@ export function compileCode(code: string): CompilationResult {
 
     const Component = createComponent(
       React,
-      Html5Audio,
+      Audio,
         Img,
       Remotion,
       RemotionShapes,
@@ -190,156 +190,3 @@ export function compileCode(code: string): CompilationResult {
     return { Component: null, error: errorMessage };
   }
 }
-
-// Replace the extractComponentBody function with this:
-// function extractComponentBody(code: string): string {
-//   // Strip import statements
-//   let cleaned = code.replace(/^import\s+.*$/gm, "").trim();
-  
-//   // Remove the "export" keyword but keep the rest of the component definition
-//   cleaned = cleaned.replace(/export\s+const\s+(\w+)\s*=/, "const $1 =");
-  
-//   return cleaned;
-// }
-
-// // And update the compileCode function:
-// export function compileCode(code: string): CompilationResult {
-//   if (!code?.trim()) {
-//     return { Component: null, error: "No code provided" };
-//   }
-
-//   try {
-//     const componentBody = extractComponentBody(code);
-    
-//     // Find the component name (e.g., "MyAnimation")
-//     const componentNameMatch = componentBody.match(/const\s+(\w+)\s*=\s*\(\s*\)\s*=>/);
-//     const componentName = componentNameMatch ? componentNameMatch[1] : "MyAnimation";
-
-//     // Wrap the entire component definition, not just the body
-//     const wrappedSource = `${componentBody}\nconst DynamicAnimation = ${componentName};`;
-
-//     const transpiled = Babel.transform(wrappedSource, {
-//       presets: ["react", "typescript"],
-//       filename: "dynamic-animation.tsx",
-//     });
-
-//     if (!transpiled.code) {
-//       return { Component: null, error: "Transpilation failed" };
-//     }
-
-//     const wrappedCode = `${transpiled.code}\nreturn DynamicAnimation;`;
-
-//     const createComponent = new Function(
-//       "React",
-//       "Html5Audio",
-//       "Img",
-//       "Remotion",
-//       "RemotionShapes",
-//       "Lottie",
-//       "ThreeCanvas",
-//       "THREE",
-//       "AbsoluteFill",
-//       "interpolate",
-//       "useCurrentFrame",
-//       "useVideoConfig",
-//       "spring",
-//       "Sequence",
-//       "useState",
-//       "useEffect",
-//       "useMemo",
-//       "useRef",
-//       "Rect",
-//       "Circle",
-//       "Triangle",
-//       "Star",
-//       "Polygon",
-//       "Ellipse",
-//       "Heart",
-//       "Pie",
-//       "makeRect",
-//       "makeCircle",
-//       "makeTriangle",
-//       "makeStar",
-//       "makePolygon",
-//       "makeEllipse",
-//       "makeHeart",
-//       "makePie",
-//       "TransitionSeries",
-//       "linearTiming",
-//       "springTiming",
-//       "fade",
-//       "slide",
-//       "wipe",
-//       "flip",
-//       "clockWipe",
-//       wrappedCode,
-//     );
-
-//     const Remotion = {
-//       AbsoluteFill,
-//       interpolate,
-//       useCurrentFrame,
-//       useVideoConfig,
-//       spring,
-//       Sequence,
-//     };
-
-//     const Component = createComponent(
-//       React,
-//       Html5Audio,
-//       Img,
-//       Remotion,
-//       RemotionShapes,
-//       Lottie,
-//       ThreeCanvas,
-//       THREE,
-//       AbsoluteFill,
-//       interpolate,
-//       useCurrentFrame,
-//       useVideoConfig,
-//       spring,
-//       Sequence,
-//       useState,
-//       useEffect,
-//       useMemo,
-//       useRef,
-//       RemotionShapes.Rect,
-//       RemotionShapes.Circle,
-//       RemotionShapes.Triangle,
-//       RemotionShapes.Star,
-//       RemotionShapes.Polygon,
-//       RemotionShapes.Ellipse,
-//       RemotionShapes.Heart,
-//       RemotionShapes.Pie,
-//       RemotionShapes.makeRect,
-//       RemotionShapes.makeCircle,
-//       RemotionShapes.makeTriangle,
-//       RemotionShapes.makeStar,
-//       RemotionShapes.makePolygon,
-//       RemotionShapes.makeEllipse,
-//       RemotionShapes.makeHeart,
-//       RemotionShapes.makePie,
-//       TransitionSeries,
-//       linearTiming,
-//       springTiming,
-//       fade,
-//       slide,
-//       wipe,
-//       flip,
-//       clockWipe,
-//     );
-
-//     if (typeof Component !== "function") {
-//       return {
-//         Component: null,
-//         error: "Code must be a function that returns a React component",
-//       };
-//     }
-
-//     return { Component, error: null };
-//   } catch (error) {
-//     const errorMessage =
-//       error instanceof Error ? error.message : "Unknown compilation error";
-//     return { Component: null, error: errorMessage };
-//   }
-// }

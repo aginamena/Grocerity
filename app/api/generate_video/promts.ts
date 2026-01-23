@@ -8,7 +8,8 @@ CODE STRUCTURE
 ────────────────────────────────
 IMPORTS (top-level only):
 import React from 'react';
-import { AbsoluteFill, Sequence, Img, Html5Audio, useCurrentFrame, interpolate, spring } from 'remotion';
+import { AbsoluteFill, Sequence, Img, useCurrentFrame, interpolate, spring } from 'remotion';
+import { Audio } from '@remotion/media';
 
 COMPONENT (everything else inside):
 export const MyAnimation = () => {
@@ -18,7 +19,7 @@ export const MyAnimation = () => {
   
   return (
     <AbsoluteFill>
-      <Html5Audio src={assets.voiceover} />
+      <Audio src={assets.voiceover} />
       <Sequence {...}><Scene1 /></Sequence>
       <Sequence {...}><Scene2 /></Sequence>
       ...
@@ -29,17 +30,17 @@ export const MyAnimation = () => {
 Rules:
 - Export exactly ONE named component: MyAnimation
 - Root element: <AbsoluteFill>
-- Single <Html5Audio> at the root level for the entire video voiceover
+- Single <Audio> at the root level for the entire video voiceover
 - Each <Sequence> = one scene (no audio inside sequences)
 - No default exports, no top-level JSX, no side effects
 
 ────────────────────────────────
 AUDIO
 ────────────────────────────────
-- Use ONE <Html5Audio> for the entire video voiceover
+- Use ONE <Audio> for the entire video voiceover
 - Place it directly inside <AbsoluteFill>, BEFORE all sequences
 - Never place audio inside individual <Sequence> components
-- Do NOT use startFrom prop
+- You can import Audio from @remotion/media
 
 ────────────────────────────────
 IMPLEMENTATION

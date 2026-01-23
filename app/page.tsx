@@ -31,6 +31,7 @@ import {
   useMediaQuery,
 } from "@mui/material";
 import { Player } from "@remotion/player";
+import { renderMediaOnWeb } from "@remotion/web-renderer";
 import confetti from "canvas-confetti";
 import React, { useEffect, useState } from "react";
 import { extractComponentCode } from "./util";
@@ -43,9 +44,9 @@ export default function Home() {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [hasGeneratedVideo, setHasGeneratedVideo] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
 
   const compressImage = (file: File): Promise<File> => {
@@ -195,6 +196,36 @@ export default function Home() {
     const code = sessionStorage.getItem("createdCode");
     const compilationResult = compileCode(code || "");
     return compilationResult.Component ?? (() => null);
+  }
+
+  async function renderAndDownload() {
+    setDownloading(true);
+    try {
+      const { getBlob } = await renderMediaOnWeb({
+        composition: {
+          component: Component(),
+          durationInFrames: 1200,
+          fps: 30,
+          width: 320,
+          height: 550,
+          id: "my-composition",
+        },
+      });
+
+      const blob = await getBlob();
+
+      // trigger download
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "my-video.webm";
+      a.click();
+      URL.revokeObjectURL(url);
+      setDownloading(false);
+      alert("Your video has downloaded!");
+    } catch (err) {
+      setError("Failed to download video. Please try again.");
+    }
   }
 
   const steps = [
@@ -754,7 +785,17 @@ export default function Home() {
               <Button
                 variant="contained"
                 size={isMobile ? "medium" : "large"}
-                startIcon={<FileDownload />}
+                startIcon={
+                  downloading ? (
+                    <CircularProgress
+                      size={isMobile ? 18 : 20}
+                      color="inherit"
+                    />
+                  ) : (
+                    <FileDownload />
+                  )
+                }
+                disabled={downloading}
                 sx={{
                   py: { xs: 1.2, sm: 1.5 },
                   px: { xs: 4, sm: 5 },
@@ -770,10 +811,17 @@ export default function Home() {
                     boxShadow: "0 6px 25px rgba(74, 222, 128, 0.4)",
                     transform: "translateY(-2px)",
                   },
+                  "&:disabled": {
+                    background:
+                      "linear-gradient(45deg, #4ade80 30%, #22c55e 90%)",
+                    opacity: 0.7,
+                    color: "white",
+                  },
                   transition: "all 0.2s ease",
                 }}
+                onClick={renderAndDownload}
               >
-                Download Video
+                {downloading ? "Downloading..." : "Download Video"}
               </Button>
             </Box>
           )}
