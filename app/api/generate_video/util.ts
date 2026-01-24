@@ -1,7 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { generateCode, generateScript } from "./promts";
 import { supabase } from "@/lib/supabase";
-import OpenAI from "openai";
 
 const genai = new GoogleGenAI({  });
 

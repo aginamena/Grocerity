@@ -656,7 +656,7 @@ export default function Home() {
               },
             }}
           >
-            {loading ? "Generating Your Video..." : "Generate Video"}
+            {loading ? "Creating Your Video..." : "Create Video"}
           </Button>
 
           {/* Loading Value Propositions */}
@@ -671,6 +671,22 @@ export default function Home() {
                 textAlign: "center",
               }}
             >
+              {/* Patience Message */}
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "#fbbf24",
+                  mb: 3,
+                  fontWeight: 500,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 1,
+                }}
+              >
+                ⏳ Creating a professional video can take up to 4 minutes...
+                Please be patient.
+              </Typography>
               <Typography
                 variant="subtitle2"
                 sx={{
@@ -817,6 +833,24 @@ export default function Home() {
               >
                 {downloading ? "Downloading..." : "Download Video"}
               </Button>
+              {/* Downloading Patience Message */}
+              {downloading && (
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "#fbbf24",
+                    mt: 2,
+                    fontWeight: 500,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 1,
+                  }}
+                >
+                  ⏳ Downloading your video can take up to 1 minute... Please be
+                  patient.
+                </Typography>
+              )}
             </Box>
           )}
         </Paper>

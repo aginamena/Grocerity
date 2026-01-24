@@ -8,7 +8,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^3.0.18",
     "@babel/standalone": "^7.28.6",
     "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.14.0",
