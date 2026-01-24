@@ -122,7 +122,6 @@ ${imageUrls.join(", ")}
   return response.text ?? "";
 }
 
-
 export async function generateDesign(prompt: string, imageUrls: string[]) {
       const response = await genai.models.generateContent({
         model: "gemini-2.5-pro",
@@ -172,95 +171,6 @@ export async function uploadImages(files: File[]){
         return uploadedUrls;
 }
 
-
-
-// async function convertVoiceoverToPublicUrl(
-//   script: string,
-//   voiceName: string = "Kore"
-// ): Promise<string> {
-//   try {
-//     // 1. Generate speech using Gemini TTS
-//     const response = await genai.models.generateContent({
-//       model: "gemini-2.5-flash-preview-tts",
-//       contents: [{ parts: [{ text: script }] }],
-//       config: {
-//         responseModalities: ["AUDIO"],
-//         speechConfig: {
-//           voiceConfig: {
-//             prebuiltVoiceConfig: { voiceName },
-//           },
-//         },
-//       },
-//     });
-
-//     const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-//     if (!data) {
-//       throw new Error("No audio data received from TTS");
-//     }
-
-//     const audioBuffer = Buffer.from(data, "base64");
-
-//     // 2. Convert PCM to WAV format
-//     const wavBuffer = await createWavBuffer(audioBuffer);
-
-//     // 3. Upload to Supabase
-//     const filePath = `voiceovers/${crypto.randomUUID()}.wav`;
-
-//     const { error } = await supabase.storage
-//       .from("audios")
-//       .upload(filePath, wavBuffer, {
-//         contentType: "audio/wav",
-//         upsert: false,
-//       });
-
-//     if (error) {
-//       throw error;
-//     }
-
-//     // 4. Get public URL
-//     const { data: urlData } = supabase.storage
-//       .from("audios")
-//       .getPublicUrl(filePath);
-
-//     if (!urlData?.publicUrl) {
-//       throw new Error("Failed to retrieve public URL");
-//     }
-
-//     return urlData.publicUrl;
-//   } catch (err) {
-//     console.error("convertVoiceoverToPublicUrl error:", err);
-//     throw new Error(
-//       `Failed to generate voiceover: ${
-//         err instanceof Error ? err.message : "Unknown error"
-//       }`
-//     );
-//   }
-// }
-function createWavBuffer(
-  pcmData: Buffer,
-  channels: number = 1,
-  sampleRate: number = 24000,
-  bitDepth: number = 16
-): Promise<Buffer> {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-
-    const writer = new wav.Writer({
-      channels,
-      sampleRate,
-      bitDepth,
-    });
-
-    writer.on("data", (chunk: Buffer) => chunks.push(chunk));
-    writer.on("end", () => resolve(Buffer.concat(chunks)));
-    writer.on("error", reject);
-
-    writer.write(pcmData);
-    writer.end();
-  });
-}
-
-
 async function convertVoiceoverToPublicUrl(script: string, voiceName: string = 'Kore'): Promise<string> {
   try {
     const response = await genai.models.generateContent({
@@ -308,6 +218,7 @@ async function convertVoiceoverToPublicUrl(script: string, voiceName: string = '
     throw new Error(`Failed to generate voiceover: ${err instanceof Error ? err.message : 'Unknown error'}`);
   }
 }
+
 function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000) {
   const numChannels = 1;
   const bitsPerSample = 16;
