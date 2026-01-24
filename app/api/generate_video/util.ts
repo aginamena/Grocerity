@@ -1,113 +1,150 @@
-import { generateText, ToolLoopAgent, tool, Output } from "ai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { generateCode, generateScript } from "./promts";
 import { supabase } from "@/lib/supabase";
-import { experimental_generateSpeech as generateSpeech } from "ai";
-import {openai} from "@ai-sdk/openai";
-import { z } from "zod";
+import OpenAI from "openai";
+
+const genai = new GoogleGenAI({  });
 
 export async function generateRemotionCode(design: string) {
-    const {text} = await generateText({
-        model: "google/gemini-2.5-pro",
-        system: generateCode,
-        output: Output.object({
-          schema: z.object({
-                     code: z.string().describe("The complete remotion code implementing the design"),
-            durationInFrames: z.number().describe("Total duration of the video in frames"),
-          
-        })
-        }),
-        prompt: `Write the remotion code given the design: \n\n ${design}`,
-    })
-    return text;
-}
-
-export async function AddVoiceoverURLsAndImageURLsToDesign(design: string, imageUrls: string[]) {
-      const agent = new ToolLoopAgent({
-        model: "google/gemini-2.5-pro",
-        tools: {
-            convertVoiceoverToPublicUrl: tool({
-              description: "Get the public url of a voiceover script.",
-              inputSchema: z.object({
-                sceneScript: z.string().describe("The voiceover script for the scene"),
-                voiceName: z.string().optional().describe("Voice name (e.g. alloy, echo, fable, onyx, nova, shimmer)"),
-              }),
-              execute: async ({ sceneScript, voiceName = 'alloy' }: { sceneScript: string; voiceName?: string }) => {
-                const voiceoverUrl = await convertVoiceoverToPublicUrl(sceneScript, voiceName);
-                return {
-           
-                  voiceoverUrl,
-            
-                };
-              },
-            }),
-          },
-      })
-    const {text} = await agent.generate({
-      prompt : `
-      You are given:
-    - A design script that will contain one voiceover script
-    - An array of image URLs
-    
-    Your task is to:
-    1. Identify the voiceover script in the design.
-    2. Call the tool convertVoiceoverToPublicUrl using the script text to generate a public voiceover URL.
-    3. Add the generated public voiceover URL directly next to the corresponding voiceover script.
-    4. Add the correct image URL directly next to each image reference in the design.
-    
-    Image URL mapping rules:
-    - The first URL in the image URL array corresponds to Image 1.
-    - The second URL corresponds to Image 2.
-    - The third URL corresponds to Image 3.
-    - Continue this pattern for all images.
-    
-    Output requirements:
-    - Return the complete design script.
-    - The voiceover script must include its public voiceover URL.
-    - Each image reference must include its image URL.
-    - Preserve the original wording and structure of the design as much as possible, only adding URLs where required.
-    
-    Formatting example:
-    
-    Store Images:
-    Image 1: Shelf with porridge, beans, and grains.
-    [Image URL: https://...]
-    
-    Voiceover Script (Text):
-    (0.5s–2.8s) "Welcome to our FoodMart, are you looking to restock your pantry?..."
-    [Voiceover URL: https://...]
-    
-    Inputs:
-    - Design script:
-      ${design}
-    
-    - Image URLs:
-      ${imageUrls.join(", ")}
-      `
+    const response = await genai.models.generateContent({
+        model: "gemini-2.5-pro",
+        contents: `Write the remotion code given the design: \n\n ${design}`,
+        config: {
+            systemInstruction: generateCode,
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: Type.OBJECT,
+                properties: {
+                    code: { type: Type.STRING, description: "The complete remotion code implementing the design" },
+                    durationInFrames: { type: Type.NUMBER, description: "Total duration of the video in frames" },
+                },
+                required: ["code", "durationInFrames"],
+            },
+        },
     });
-    return text;
+    return response.text;
 }
 
-export async function generateDesign(prompt:string, imageUrls:string[]) {
-      const {text} = await generateText({
-        model: "google/gemini-2.5-pro",
-        system: generateScript,
-        messages: [
-          {
-            role: "user",
-            content: [
-              ...imageUrls.map((imageUrl: string) => ({
-                type: "image" as const,
-                image: imageUrl
-              })),
-              {
-                type: "text",
-                text: prompt,
-              },
-            ],
+export async function AddVoiceoverURLsAndImageURLsToDesign(
+  design: string,
+  imageUrls: string[]
+) {
+  const convertVoiceoverTool = {
+    name: "convertVoiceoverToPublicUrl",
+    description: "Get the public url of a voiceover script.",
+    parameters: {
+      type: Type.OBJECT,
+      properties: {
+        sceneScript: {
+          type: Type.STRING,
+          description: "The voiceover script for the scene",
+        },
+        voiceName: {
+          type: Type.STRING,
+          description:
+            "Voice name (e.g. kore)",
+        },
+      },
+      required: ["sceneScript"],
+    },
+  };
+
+  const prompt = `
+You are given:
+- A design script that will contain one voiceover script
+- An array of image URLs
+
+Your task is to:
+1. Identify the voiceover script in the design.
+2. Call the tool convertVoiceoverToPublicUrl using the script text to generate a public voiceover URL.
+3. Add the generated public voiceover URL directly next to the corresponding voiceover script.
+4. Add the correct image URL directly next to each image reference in the design.
+
+Image URL mapping rules:
+- The first URL in the image URL array corresponds to Image 1.
+- The second URL corresponds to Image 2.
+- The third URL corresponds to Image 3.
+
+Output requirements:
+- Return the complete design script.
+- Preserve wording and structure; only add URLs.
+
+Inputs:
+Design script:
+${design}
+
+Image URLs:
+${imageUrls.join(", ")}
+`;
+
+  const chat = genai.chats.create({
+    model: "gemini-2.5-pro",
+    config:{
+    tools: [
+      {
+        functionDeclarations: [convertVoiceoverTool],
+      },
+    ],
+    }
+
+  });
+
+  let response = await chat.sendMessage({ message: prompt });
+
+  while (response.functionCalls?.length) {
+    const toolResponses = [];
+
+    for (const call of response.functionCalls) {
+      if (call.name === "convertVoiceoverToPublicUrl") {
+        const { sceneScript, voiceName } = call.args as {
+          sceneScript: string;
+          voiceName?: string;
+        };
+
+        const voiceoverUrl = await convertVoiceoverToPublicUrl(
+          sceneScript,
+          voiceName ?? "kore"
+        );
+
+        toolResponses.push({
+          functionResponse: {
+            name: call.name,
+            response: {
+              voiceoverUrl,
+            },
           },
+        });
+      }
+    }
+
+    response = await chat.sendMessage({ message: toolResponses });
+  }
+
+  return response.text ?? "";
+}
+
+
+export async function generateDesign(prompt: string, imageUrls: string[]) {
+      const response = await genai.models.generateContent({
+        model: "gemini-2.5-pro",
+        contents: [
+            {
+                role: "user",
+                parts: [
+                    ...imageUrls.map((imageUrl: string) => ({
+                        fileData: {
+                            fileUri: imageUrl,
+                        },
+                    })),
+                    { text: prompt },
+                ],
+            },
         ],
-      });
-        return text;
+        config: {
+            systemInstruction: generateScript,
+        },
+    });
+    return response.text || "";
 }
 
 export async function uploadImages(files: File[]){
@@ -137,50 +174,162 @@ export async function uploadImages(files: File[]){
 }
 
 
-async function convertVoiceoverToPublicUrl(
-  script: string,
-  voiceName: string = "alloy"
-): Promise<string> {
-  try {
-    // 1. Generate speech (already WAV)
-    const response = await generateSpeech({
-      model: openai.speech("gpt-4o-mini-tts"),
-      text: script,
-      voice: voiceName,
-      outputFormat: "wav",
-    });
-    const wavBuffer = Buffer.from(response.audio.uint8Array);
 
-    // 2. Upload to Supabase
+// async function convertVoiceoverToPublicUrl(
+//   script: string,
+//   voiceName: string = "Kore"
+// ): Promise<string> {
+//   try {
+//     // 1. Generate speech using Gemini TTS
+//     const response = await genai.models.generateContent({
+//       model: "gemini-2.5-flash-preview-tts",
+//       contents: [{ parts: [{ text: script }] }],
+//       config: {
+//         responseModalities: ["AUDIO"],
+//         speechConfig: {
+//           voiceConfig: {
+//             prebuiltVoiceConfig: { voiceName },
+//           },
+//         },
+//       },
+//     });
+
+//     const data = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+//     if (!data) {
+//       throw new Error("No audio data received from TTS");
+//     }
+
+//     const audioBuffer = Buffer.from(data, "base64");
+
+//     // 2. Convert PCM to WAV format
+//     const wavBuffer = await createWavBuffer(audioBuffer);
+
+//     // 3. Upload to Supabase
+//     const filePath = `voiceovers/${crypto.randomUUID()}.wav`;
+
+//     const { error } = await supabase.storage
+//       .from("audios")
+//       .upload(filePath, wavBuffer, {
+//         contentType: "audio/wav",
+//         upsert: false,
+//       });
+
+//     if (error) {
+//       throw error;
+//     }
+
+//     // 4. Get public URL
+//     const { data: urlData } = supabase.storage
+//       .from("audios")
+//       .getPublicUrl(filePath);
+
+//     if (!urlData?.publicUrl) {
+//       throw new Error("Failed to retrieve public URL");
+//     }
+
+//     return urlData.publicUrl;
+//   } catch (err) {
+//     console.error("convertVoiceoverToPublicUrl error:", err);
+//     throw new Error(
+//       `Failed to generate voiceover: ${
+//         err instanceof Error ? err.message : "Unknown error"
+//       }`
+//     );
+//   }
+// }
+function createWavBuffer(
+  pcmData: Buffer,
+  channels: number = 1,
+  sampleRate: number = 24000,
+  bitDepth: number = 16
+): Promise<Buffer> {
+  return new Promise((resolve, reject) => {
+    const chunks: Buffer[] = [];
+
+    const writer = new wav.Writer({
+      channels,
+      sampleRate,
+      bitDepth,
+    });
+
+    writer.on("data", (chunk: Buffer) => chunks.push(chunk));
+    writer.on("end", () => resolve(Buffer.concat(chunks)));
+    writer.on("error", reject);
+
+    writer.write(pcmData);
+    writer.end();
+  });
+}
+
+
+async function convertVoiceoverToPublicUrl(script: string, voiceName: string = 'Kore'): Promise<string> {
+  try {
+    const response = await genai.models.generateContent({
+      model: 'gemini-2.5-flash-preview-tts',
+      contents: [{ parts: [{ text: script }] }],
+      config: {
+        responseModalities: ['AUDIO'],
+        speechConfig: {
+          voiceConfig: {
+            prebuiltVoiceConfig: { voiceName },
+          },
+        },
+      },
+    });
+
+    const part = response.candidates?.[0]?.content?.parts?.[0];
+    const audioData = part?.inlineData?.data;
+
+    if (!audioData) {
+      throw new Error('No audio returned from Gemini');
+    }
+
+    const pcmBuffer = Buffer.from(audioData, 'base64');
+    const wavBuffer = pcmToWav(pcmBuffer, 24000);
+
+    // Upload to Supabase
     const filePath = `voiceovers/${crypto.randomUUID()}.wav`;
 
     const { error } = await supabase.storage
-      .from("audios")
+      .from('audios')
       .upload(filePath, wavBuffer, {
-        contentType: "audio/wav",
+        contentType: 'audio/wav',
         upsert: false,
       });
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
-    // 3. Get public URL
     const { data } = supabase.storage
-      .from("audios")
+      .from('audios')
       .getPublicUrl(filePath);
-
-    if (!data?.publicUrl) {
-      throw new Error("Failed to retrieve public URL");
-    }
 
     return data.publicUrl;
   } catch (err) {
-    console.error("convertVoiceoverToPublicUrl error:", err);
-    throw new Error(
-      `Failed to generate voiceover: ${
-        err instanceof Error ? err.message : "Unknown error"
-      }`
-    );
+    console.error('convertVoiceoverToPublicUrl error:', err);
+    throw new Error(`Failed to generate voiceover: ${err instanceof Error ? err.message : 'Unknown error'}`);
   }
+}
+function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000) {
+  const numChannels = 1;
+  const bitsPerSample = 16;
+  const byteRate = sampleRate * numChannels * bitsPerSample / 8;
+  const blockAlign = numChannels * bitsPerSample / 8;
+
+  const wavHeader = Buffer.alloc(44);
+
+  wavHeader.write('RIFF', 0);
+  wavHeader.writeUInt32LE(36 + pcmBuffer.length, 4);
+  wavHeader.write('WAVE', 8);
+  wavHeader.write('fmt ', 12);
+  wavHeader.writeUInt32LE(16, 16);
+  wavHeader.writeUInt16LE(1, 20); // PCM
+  wavHeader.writeUInt16LE(numChannels, 22);
+  wavHeader.writeUInt32LE(sampleRate, 24);
+  wavHeader.writeUInt32LE(byteRate, 28);
+  wavHeader.writeUInt16LE(blockAlign, 32);
+  wavHeader.writeUInt16LE(bitsPerSample, 34);
+  wavHeader.write('data', 36);
+  wavHeader.writeUInt32LE(pcmBuffer.length, 40);
+
+  return Buffer.concat([wavHeader, pcmBuffer])
 }
