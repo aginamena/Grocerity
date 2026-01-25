@@ -1,8 +1,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { generateCode, generateScript } from "./promts";
 import { supabase } from "@/lib/supabase";
+import {Opik} from "opik";
 
-const genai = new GoogleGenAI({  });
+const genai = new GoogleGenAI({});
+const client = new Opik()
 
 export async function generateRemotionCode(design: string) {
     const response = await genai.models.generateContent({
@@ -21,7 +23,19 @@ export async function generateRemotionCode(design: string) {
             },
         },
     });
-    return response.text;
+    const result = response.text;
+      // Trace logging into opik
+  const trace = client.trace({
+    name: "generateRemotionCode",
+  input: {
+    design,
+  },
+  output: {response:result},
+  metadata:{model: "gemini-2.5-pro"}
+  })
+  trace.end()
+  await client.flush()
+    return result
 }
 
 export async function AddVoiceoverURLsAndImageURLsToDesign(
@@ -118,8 +132,22 @@ ${imageUrls.join(", ")}
 
     response = await chat.sendMessage({ message: toolResponses });
   }
+  const result = response.text ?? "";
 
-  return response.text ?? "";
+  // Trace logging into opik
+  const trace = client.trace({
+    name: "AddVoiceoverURLsAndImageURLsToDesign",
+  input: {
+    design,
+    imageUrls
+  },
+  output: {response:result},
+    metadata:{model: "gemini-2.5-pro"}
+  })
+  trace.end()
+  await client.flush()
+
+  return result;
 }
 
 export async function generateDesign(prompt: string, imageUrls: string[]) {
@@ -142,7 +170,21 @@ export async function generateDesign(prompt: string, imageUrls: string[]) {
             systemInstruction: generateScript,
         },
     });
-    return response.text || "";
+    const result =  response.text || ""
+      // Trace logging into opik
+  const trace = client.trace({
+    name: "generateDesign",
+  input: {
+    prompt,
+    imageUrls
+  },
+  output: {response:result},
+    metadata:{model: "gemini-2.5-pro"}
+  })
+  trace.end()
+  await client.flush()
+
+    return result
 }
 
 export async function uploadImages(files: File[]){
