@@ -127,6 +127,7 @@ export default function Home() {
       return;
     }
     setImagePreviews([]);
+    setSelectedImages([]);
     setPrompt("");
     setLoading(true);
     setError(null);
