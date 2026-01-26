@@ -87,9 +87,6 @@ Structure: HOOK (3s) → BUILD excitement → PEAK offer → CTA
 Use: Exclamations! Questions? Power words (Incredible! Don't miss out! Right now!)
 Avoid: Flat, monotone, corporate-speak
 
-❌ "Welcome to our store. We have good prices."
-✅ "STOP scrolling! Fresh Market just dropped INSANE deals—50% off organic veggies! Let's GO!"
-
 Speaking rate: ~170 words/min (3 words/sec)
 
 ────────────────────────────────

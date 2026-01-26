@@ -205,7 +205,10 @@ export default function Home() {
       const { getBlob } = await renderMediaOnWeb({
         composition: {
           component: Component(),
-          durationInFrames: 1200,
+          durationInFrames: parseInt(
+            sessionStorage.getItem("durationInFrames") || "1200",
+            10,
+          ),
           fps: 30,
           width: 320,
           height: 550,

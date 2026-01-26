@@ -132,12 +132,13 @@ export function compileCode(code: string): CompilationResult {
       wrappedCode,
     );
 
+
     const Component = createComponent(
       React,
-      Audio,
-        Img,
-      Remotion,
       Easing,
+      Audio,
+      Img,
+      Remotion,
       RemotionShapes,
       Lottie,
       ThreeCanvas,
