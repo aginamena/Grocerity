@@ -8,7 +8,7 @@ const client = new Opik()
 
 export async function generateRemotionCode(design: string) {
     const response = await genai.models.generateContent({
-        model: "gemini-2.5-pro",
+        model: "gemini-3-flash-preview",
         contents: `Write the remotion code given the design: \n\n ${design}`,
         config: {
             systemInstruction: generateCode,
@@ -31,7 +31,7 @@ export async function generateRemotionCode(design: string) {
     design,
   },
   output: {response:result},
-  metadata:{model: "gemini-2.5-pro"}
+  metadata:{model: "gemini-3-flash-preview"}
   })
   trace.end()
   await client.flush()
@@ -91,7 +91,7 @@ ${imageUrls.join(", ")}
 `;
 
   const chat = genai.chats.create({
-    model: "gemini-2.5-pro",
+    model: "gemini-3-flash-preview",
     config:{
     tools: [
       {
@@ -142,7 +142,7 @@ ${imageUrls.join(", ")}
     imageUrls
   },
   output: {response:result},
-    metadata:{model: "gemini-2.5-pro"}
+    metadata:{model: "gemini-3-flash-preview"}
   })
   trace.end()
   await client.flush()
@@ -152,7 +152,7 @@ ${imageUrls.join(", ")}
 
 export async function generateDesign(prompt: string, imageUrls: string[]) {
       const response = await genai.models.generateContent({
-        model: "gemini-2.5-pro",
+        model: "gemini-3-flash-preview",
         contents: [
             {
                 role: "user",
@@ -179,7 +179,7 @@ export async function generateDesign(prompt: string, imageUrls: string[]) {
     imageUrls
   },
   output: {response:result},
-    metadata:{model: "gemini-2.5-pro"}
+    metadata:{model: "gemini-3-flash-preview"}
   })
   trace.end()
   await client.flush()

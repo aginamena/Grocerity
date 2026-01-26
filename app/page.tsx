@@ -219,7 +219,7 @@ export default function Home() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "my-video.webm";
+      a.download = "my-video.mp4";
       a.click();
       URL.revokeObjectURL(url);
       setDownloading(false);
@@ -579,7 +579,7 @@ export default function Home() {
             fullWidth
             multiline
             rows={isMobile ? 3 : 4}
-            placeholder="E.g., Create a high-energy video ad showcasing these products with dynamic transitions and upbeat music. Include a call-to-action to visit our store..."
+            placeholder="E.g., Create a high-energy video ad showcasing these products with dynamic transitions. Include a call-to-action to visit our store..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
             disabled={loading}
