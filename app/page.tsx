@@ -765,7 +765,7 @@ export default function Home() {
                 gutterBottom
                 sx={{ color: "#e2e8f0" }}
               >
-                Your Generated Video
+                Your Created Video
               </Typography>
               <Box
                 sx={{
