@@ -7,6 +7,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
   spring,
+  Easing,
   Sequence,
   Img
 } from "remotion";
@@ -85,6 +86,7 @@ export function compileCode(code: string): CompilationResult {
 
     const createComponent = new Function(
       "React",
+      "Easing",
       "Audio",
       "Img",
       "Remotion",
@@ -135,6 +137,7 @@ export function compileCode(code: string): CompilationResult {
       Audio,
         Img,
       Remotion,
+      Easing,
       RemotionShapes,
       Lottie,
       ThreeCanvas,
