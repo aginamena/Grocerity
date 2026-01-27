@@ -20,8 +20,8 @@ export const MyAnimation = () => {
   return (
     <AbsoluteFill>
       <Audio src={assets.voiceover} />
-      <Sequence {...}><Scene1 /></Sequence>
-      <Sequence {...}><Scene2 /></Sequence>
+      <Sequence from={0} durationInFrames={...}><Scene1 /></Sequence>
+      <Sequence from={...} durationInFrames={...}><Scene2 /></Sequence>
       ...
     </AbsoluteFill>
   );
@@ -32,7 +32,16 @@ Rules:
 - Root element: <AbsoluteFill>
 - Single <Audio> at the root level for the entire video voiceover
 - Each <Sequence> = one scene (no audio inside sequences)
+- ALWAYS explicitly set 'from' and 'durationInFrames' props for every Sequence
 - No default exports, no top-level JSX, no side effects
+
+────────────────────────────────
+TIMING & SYNCHRONIZATION
+────────────────────────────────
+- STRICTLY follow the durationInFrames defined in the design document (based on voiceover word count).
+- The 'from' prop of Scene N must equal the sum of durations of Scenes 1 to N-1.
+- Ensure the total video duration equals the sum of all scene durations.
+- Animations inside a scene must use (frame % sceneDuration) or relative frame logic to ensure they complete exactly when the scene ends.
 
 ────────────────────────────────
 AUDIO
@@ -46,10 +55,10 @@ AUDIO
 IMPLEMENTATION
 ────────────────────────────────
 Match the design exactly:
-- Positioning, sizing, spacing
-- Fonts, colors, styles
-- Animation timing and easing
-- Transitions (Fade, Wipe, Clockwipe, Iris and Slide)
+- Positioning: Images must be full screen (object-fit: cover).
+- NO TEXT OVERLAYS: Do not render any <div> with text or captions.
+- Animation timing: Must scale/pan smoothly over the full duration of the scene.
+- Transitions: Implement specific transitions (Fast Wipe, Slide, Fade) at the end of scenes as requested.
 
 ────────────────────────────────
 OUTPUT
@@ -74,8 +83,25 @@ OUTPUT: Video design document (no code)
 ────────────────────────────────
 SETTINGS
 ────────────────────────────────
-- Duration: <60 seconds | Dimensions: 320×550px | FPS: 30
-- Pacing: Quick cuts (2-4s typical) | One continuous voiceover
+- Dimensions: 320×550px | FPS: 30
+- Pacing: Dynamic, driven strictly by the voiceover script.
+- NO TEXT OVERLAYS: Do not include on-screen text, titles, or captions. Focus purely on visuals and voiceover.
+
+────────────────────────────────
+TIMING & SYNCHRONIZATION ALGORITHM
+────────────────────────────────
+You must calculate timing mathematically based on the voiceover:
+
+1. WRITE THE FULL SCRIPT FIRST.
+2. DIVIDE the script into segments, assigning one segment to each scene/image.
+3. CALCULATE duration for each scene using this formula:
+   • Speaking Rate: 180 words/minute (3 words/second).
+   • Word Duration: ~0.33 seconds/word.
+   • Frame Conversion: 0.33s * 30fps ≈ 10 frames per word.
+   
+   FORMULA: Scene Duration (Frames) = (Number of Words in Segment) × 10
+   
+4. The transitions should fit within this calculated duration.
 
 ────────────────────────────────
 VOICEOVER STYLE
@@ -87,8 +113,6 @@ Structure: HOOK (3s) → BUILD excitement → PEAK offer → CTA
 Use: Exclamations! Questions? Power words (Incredible! Don't miss out! Right now!)
 Avoid: Flat, monotone, corporate-speak
 
-Speaking rate: ~170 words/min (3 words/sec)
-
 ────────────────────────────────
 IMAGES & ANIMATIONS
 ────────────────────────────────
@@ -96,42 +120,36 @@ All images: 100% fill, object-fit: cover, no letterboxing
 
 | Animation | Values | Energy |
 |-----------|--------|--------|
-| Power Zoom | scale 1.0→1.4 fast | 🔥🔥🔥 |
-| Snap Zoom | scale 1.0→1.2 in 5 frames | 🔥🔥🔥 |
-| Slow Zoom | scale 1.0→1.15 full duration | 🔥 |
-| Whip Pan | translateX ±50px fast | 🔥🔥🔥 |
-| Ken Burns | zoom + pan combo | 🔥🔥 |
+| Power Zoom | scale 1.0→1.4 over scene duration | 🔥🔥🔥 |
+| Snap Zoom | scale 1.0→1.2 in first 50% of scene | 🔥🔥🔥 |
+| Slow Zoom | scale 1.0→1.15 over scene duration | 🔥 |
+| Whip Pan | translateX within scene duration | 🔥🔥🔥 |
+| Ken Burns | zoom + pan over scene duration | 🔥🔥 |
 
 Rule: Scale never <1.0 (don't reveal edges)
-
-────────────────────────────────
-TRANSITIONS
-────────────────────────────────
-| Type | Frames | Best For |
-|------|--------|----------|
-| Hard Cut | 0 | Quick reveals, momentum |
-| Fast Wipe | 5-8 | Energetic changes |
-| Slide | 8-12 | Related products |
-| Fade | 12-15 | Mood shifts only |
+Rule: Animation duration MUST MATCH calculated scene duration.
 
 ────────────────────────────────
 OUTPUT FORMAT
 ────────────────────────────────
-1. CONCEPT: Title, vibe, duration, scene count
+1. CONCEPT: Title, vibe, total duration, scene count
 
-2. VOICEOVER: Full script + word count + duration
+2. VOICEOVER: Full script string
 
-3. SCENES: For each—
-   - Timing & energy level (Low/Med/High/EXPLOSIVE)
-   - Voiceover segment + pacing
-   - Image + animation + transition
+3. SCENES: For each scene—
+   - Voiceover Segment: "Specific text for this scene..."
+   - Word Count: N words
+   - Duration Calculation: N words * 10 frames = X frames
+   - Timing: Start Frame - End Frame (Must align with calculation)
+   - Image + animation + transition (NO TEXT OVERLAYS)
 
-4. ASSETS: Confirm ALL images used, total duration
+4. ASSETS: Confirm ALL images used, total duration matches script length.
 
 ────────────────────────────────
 CHECKLIST
 ────────────────────────────────
-□ Hook in first 3 seconds? □ ALL images used?
-□ Energetic voiceover? □ Varied pacing?
-□ Under 60 seconds? □ Would YOU stop scrolling?
+□ All images used? 
+□ Voiceover broken down per scene?
+□ Scene durations exactly equal (Word Count × 10) frames?
+□ NO text overlays?
 `;
