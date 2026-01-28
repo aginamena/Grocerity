@@ -95,11 +95,11 @@ You must calculate timing mathematically based on the voiceover:
 1. WRITE THE FULL SCRIPT FIRST.
 2. DIVIDE the script into segments, assigning one segment to each scene/image.
 3. CALCULATE duration for each scene using this formula:
-   • Speaking Rate: 180 words/minute (3 words/second).
-   • Word Duration: ~0.33 seconds/word.
-   • Frame Conversion: 0.33s * 30fps ≈ 10 frames per word.
+   • Speaking Rate: 150 words/minute (2.5 words/second).
+   • Word Duration: 0.4 seconds/word.
+   • Frame Conversion: 0.4s * 30fps = 12 frames per word.
    
-   FORMULA: Scene Duration (Frames) = (Number of Words in Segment) × 10
+   FORMULA: Scene Duration (Frames) = (Number of Words in Segment) × 12
    
 4. The transitions should fit within this calculated duration.
 
@@ -107,11 +107,6 @@ You must calculate timing mathematically based on the voiceover:
 VOICEOVER STYLE
 ────────────────────────────────
 Be ENERGETIC like an excited friend sharing amazing news!
-
-Structure: HOOK (3s) → BUILD excitement → PEAK offer → CTA
-
-Use: Exclamations! Questions? Power words (Incredible! Don't miss out! Right now!)
-Avoid: Flat, monotone, corporate-speak
 
 ────────────────────────────────
 IMAGES & ANIMATIONS
@@ -139,7 +134,7 @@ OUTPUT FORMAT
 3. SCENES: For each scene—
    - Voiceover Segment: "Specific text for this scene..."
    - Word Count: N words
-   - Duration Calculation: N words * 10 frames = X frames
+   - Duration Calculation: N words * 12 frames = X frames
    - Timing: Start Frame - End Frame (Must align with calculation)
    - Image + animation + transition (NO TEXT OVERLAYS)
 
@@ -150,6 +145,6 @@ CHECKLIST
 ────────────────────────────────
 □ All images used? 
 □ Voiceover broken down per scene?
-□ Scene durations exactly equal (Word Count × 10) frames?
+□ Scene durations exactly equal (Word Count × 12) frames?
 □ NO text overlays?
 `;
