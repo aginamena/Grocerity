@@ -1,0 +1,126 @@
+import { Box, Typography, Paper, useMediaQuery, Grid } from "@mui/material";
+import { History as HistoryIcon } from "@mui/icons-material";
+import { Player } from "@remotion/player";
+import { compileCode } from "@/lib/remotion/compiler";
+import { extractComponentCode } from "@/app/util";
+import React, { useMemo } from "react";
+
+// Keep your hardcoded videos here for now
+const videos = [
+  {
+    code: "import React from 'react';\nimport { AbsoluteFill, Sequence, Img, useCurrentFrame, interpolate, spring } from 'remotion';\nimport { Audio } from '@remotion/media';\n\nexport const MyAnimation = () => {\n  const assets = {\n    voiceover: \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/273ac052-b1d8-41ae-a9ee-31a745aee2cf.wav\",\n    scene1: \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769610232251-5kz1wz3.webp\",\n    scene2: \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769610234249-9p2wjqj.webp\",\n    scene3: \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769610234651-l3sp0b6.webp\",\n    scene4: \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769610235425-hmuz4pc.webp\",\n    scene5: \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769610235972-ik4tb7z.webp\",\n    scene6: \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769610236473-4gopgeh.webp\"\n  };\n\n  const Scene1 = ({ duration }) => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, duration], [1, 1.2]);\n    const translateX = interpolate(frame, [0, duration], [0, 40]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.scene1} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale}) translateX(${translateX}px)` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene2 = ({ duration }) => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, duration], [1, 1.4]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.scene2} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene3 = ({ duration }) => {\n    const frame = useCurrentFrame();\n    const translateX = interpolate(frame, [0, duration], [-100, 100]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.scene3} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(1.2) translateX(${translateX}px)` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene4 = ({ duration }) => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, duration], [1, 1.15]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.scene4} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene5 = ({ duration }) => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 96], [1, 1.2], { extrapolateRight: 'clamp' });\n    return (\n      <AbsoluteFill>\n        <Img src={assets.scene5} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene6 = ({ duration }) => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, duration], [1, 1.4]);\n    const opacity = interpolate(frame, [duration - 15, duration], [1, 0], { extrapolateLeft: 'clamp' });\n    return (\n      <AbsoluteFill style={{ opacity }}>\n        <Img src={assets.scene6} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'black' }}>\n      <Audio src={assets.voiceover} />\n      <Sequence from={0} durationInFrames={180}>\n        <Scene1 duration={180} />\n      </Sequence>\n      <Sequence from={180} durationInFrames={216}>\n        <Scene2 duration={216} />\n      </Sequence>\n      <Sequence from={396} durationInFrames={228}>\n        <Scene3 duration={228} />\n      </Sequence>\n      <Sequence from={624} durationInFrames={216}>\n        <Scene4 duration={216} />\n      </Sequence>\n      <Sequence from={840} durationInFrames={192}>\n        <Scene5 duration={192} />\n      </Sequence>\n      <Sequence from={1032} durationInFrames={216}>\n        <Scene6 duration={216} />\n      </Sequence>\n    </AbsoluteFill>\n  );\n};",
+    durationInFrames: 1248,
+  },
+  {
+    code: "import React from 'react';\nimport { AbsoluteFill, Sequence, Img, useCurrentFrame, interpolate } from 'remotion';\nimport { Audio } from '@remotion/media';\n\nexport const MyAnimation = () => {\n  const assets = {\n    voiceover: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/e21a071a-f22c-4a29-b040-01ac0ea369ca.wav',\n    images: {\n      scene1: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769575500145-oaesaw4.jpg',\n      scene2: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769575497139-ns688oo.webp',\n      scene3: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769575498449-lev5mhh.webp',\n      scene4: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769575497898-331fsj0.webp',\n      scene5: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769575498824-b9xuy4g.jpg',\n      scene6: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769575501030-2qia1qc.png',\n      scene7: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769575500443-3tqd6ic.jpg',\n      scene8: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769575500679-90ju75u.jpg',\n      scene9: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769575499907-yb431rw.jpg',\n      scene10: 'https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769575499062-m45lmo5.jpg'\n    }\n  };\n\n  const Scene1 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 120], [1, 1.15]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images.scene1} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene2 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 120], [1, 1.4]);\n    const translateX = interpolate(frame, [110, 120], [0, -100], { extrapolateLeft: 'clamp' });\n    return (\n      <AbsoluteFill style={{ transform: `translateX(${translateX}%)` }}>\n        <Img src={assets.images.scene2} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene3 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 54], [1, 1.2], { extrapolateRight: 'clamp' });\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images.scene3} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene4 = () => {\n    const frame = useCurrentFrame();\n    const translateX_Pan = interpolate(frame, [0, 108], [-10, 10]);\n    const translateX_Whip = interpolate(frame, [98, 108], [0, 100], { extrapolateLeft: 'clamp' });\n    return (\n      <AbsoluteFill style={{ transform: `translateX(${translateX_Whip}%)` }}>\n        <Img src={assets.images.scene4} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(1.3) translateX(${translateX_Pan}%)` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene5 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 120], [1, 1.2]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images.scene5} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene6 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 108], [1, 1.15]);\n    const translateY_Whip = interpolate(frame, [98, 108], [0, 100], { extrapolateLeft: 'clamp' });\n    return (\n      <AbsoluteFill style={{ transform: `translateY(${translateY_Whip}%)` }}>\n        <Img src={assets.images.scene6} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene7 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 120], [1, 1.4]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images.scene7} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene8 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 108], [1, 1.2]);\n    const translateY_Whip = interpolate(frame, [98, 108], [0, -100], { extrapolateLeft: 'clamp' });\n    return (\n      <AbsoluteFill style={{ transform: `translateY(${translateY_Whip}%)` }}>\n        <Img src={assets.images.scene8} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene9 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 108], [1.3, 1]);\n    const translateX_Pan = interpolate(frame, [0, 108], [5, -5]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images.scene9} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale}) translateX(${translateX_Pan}%)` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene10 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 108], [1, 1.4]);\n    const opacity = interpolate(frame, [93, 107], [1, 0], { extrapolateLeft: 'clamp' });\n    return (\n      <AbsoluteFill style={{ opacity }}>\n        <Img src={assets.images.scene10} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'black' }}>\n      <Audio src={assets.voiceover} />\n      <Sequence from={0} durationInFrames={120}><Scene1 /></Sequence>\n      <Sequence from={120} durationInFrames={120}><Scene2 /></Sequence>\n      <Sequence from={240} durationInFrames={108}><Scene3 /></Sequence>\n      <Sequence from={348} durationInFrames={108}><Scene4 /></Sequence>\n      <Sequence from={456} durationInFrames={120}><Scene5 /></Sequence>\n      <Sequence from={576} durationInFrames={108}><Scene6 /></Sequence>\n      <Sequence from={684} durationInFrames={120}><Scene7 /></Sequence>\n      <Sequence from={804} durationInFrames={108}><Scene8 /></Sequence>\n      <Sequence from={912} durationInFrames={108}><Scene9 /></Sequence>\n      <Sequence from={1020} durationInFrames={108}><Scene10 /></Sequence>\n    </AbsoluteFill>\n  );\n};",
+    durationInFrames: 1128,
+  },
+  {
+    code: "import React from 'react';\nimport { AbsoluteFill, Sequence, Img, useCurrentFrame, interpolate, spring } from 'remotion';\nimport { Audio } from '@remotion/media';\n\nexport const MyAnimation = () => {\n  const assets = {\n    voiceover: \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/0cd46690-c0c6-4c4a-89ac-dfd92058b239.wav\",\n    images: [\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769616981856-prla1je.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769616982793-pqo2g1v.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769616983425-n0iel3r.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769616983982-v1jr3xj.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769616984362-2eezlq7.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769616984888-d84e9yo.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769616985294-ab6crid.jpg\"\n    ]\n  };\n\n  const Scene1 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 78, 156], [1.0, 1.2, 1.2], { extrapolateRight: 'clamp' });\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene2 = () => {\n    const frame = useCurrentFrame();\n    const translateX = interpolate(frame, [0, 132], [-10, 10]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images[1]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(1.2) translateX(${translateX}%)` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene3 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 168], [1.0, 1.4], { extrapolateRight: 'clamp' });\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images[2]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})`, transformOrigin: 'center' }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene4 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 156], [1.0, 1.15], { extrapolateRight: 'clamp' });\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images[3]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene5 = () => {\n    const frame = useCurrentFrame();\n    const translateY = interpolate(frame, [0, 144], [-5, 5]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images[4]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(1.1) translateY(${translateY}%)` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene6 = () => {\n    const frame = useCurrentFrame();\n    const scale = spring({ frame, fps: 30, config: { stiffness: 100 } });\n    const scaleValue = interpolate(scale, [0, 1], [1, 1.3]);\n    return (\n      <AbsoluteFill>\n        <Img src={assets.images[5]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scaleValue})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene7 = () => {\n    const frame = useCurrentFrame();\n    const scale = interpolate(frame, [0, 204], [1.0, 1.4], { extrapolateRight: 'clamp' });\n    const opacity = interpolate(frame, [184, 204], [1, 0]);\n    return (\n      <AbsoluteFill style={{ opacity }}>\n        <Img src={assets.images[6]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'black' }}>\n      <Audio src={assets.voiceover} />\n      <Sequence from={0} durationInFrames={156}><Scene1 /></Sequence>\n      <Sequence from={156} durationInFrames={132}><Scene2 /></Sequence>\n      <Sequence from={288} durationInFrames={168}><Scene3 /></Sequence>\n      <Sequence from={456} durationInFrames={156}><Scene4 /></Sequence>\n      <Sequence from={612} durationInFrames={144}><Scene5 /></Sequence>\n      <Sequence from={756} durationInFrames={120}><Scene6 /></Sequence>\n      <Sequence from={876} durationInFrames={204}><Scene7 /></Sequence>\n    </AbsoluteFill>\n  );\n};",
+    durationInFrames: 1080,
+  },
+  {
+    code: "import React from 'react';\nimport { AbsoluteFill, Sequence, Img, useCurrentFrame, interpolate, spring } from 'remotion';\nimport { Audio } from '@remotion/media';\n\nexport const MyAnimation = () => {\n  const assets = {\n    voiceover: \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/audios/voiceovers/ddc18017-0d8c-44f3-8fe8-e4303dc9a7b2.wav\",\n    images: [\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769617486310-u3wz9us.webp\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769617485977-lnaffdg.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769617483471-km1gdw5.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769617485195-5w43esr.png\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769617485503-5cjsij4.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769617484905-9kjrh8d.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769617484582-ni89c2u.jpg\",\n      \"https://vxfpglnrdktcbfmitjqk.supabase.co/storage/v1/object/public/images/images/1769617484236-u5nowvo.jpg\"\n    ]\n  };\n\n  const Scene1 = () => {\n    const frame = useCurrentFrame();\n    const duration = 216;\n    const scale = interpolate(frame, [0, duration], [1, 1.15]);\n    const translateX = interpolate(frame, [0, duration], [0, 30]);\n    const opacity = interpolate(frame, [duration - 15, duration], [1, 0], { extrapolateLeft: 'clamp' });\n    return (\n      <AbsoluteFill style={{ overflow: 'hidden', opacity }}>\n        <Img src={assets.images[0]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale}) translateX(${translateX}px)` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene2 = () => {\n    const frame = useCurrentFrame();\n    const scale = spring({ frame, fps: 30, config: { damping: 12 }, durationInFrames: 96 });\n    const finalScale = interpolate(scale, [0, 1], [1, 1.2]);\n    return (\n      <AbsoluteFill style={{ overflow: 'hidden' }}>\n        <Img src={assets.images[1]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${finalScale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene3 = () => {\n    const frame = useCurrentFrame();\n    const duration = 216;\n    const scale = interpolate(frame, [0, duration], [1, 1.4]);\n    return (\n      <AbsoluteFill style={{ overflow: 'hidden' }}>\n        <Img src={assets.images[2]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene4 = () => {\n    const frame = useCurrentFrame();\n    const duration = 180;\n    const scale = interpolate(frame, [0, duration], [1, 1.15]);\n    const slideOut = interpolate(frame, [duration - 10, duration], [0, -100], { extrapolateLeft: 'clamp' });\n    return (\n      <AbsoluteFill style={{ overflow: 'hidden', transform: `translateX(${slideOut}%)` }}>\n        <Img src={assets.images[3]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene5 = () => {\n    const frame = useCurrentFrame();\n    const duration = 180;\n    const whipPan = interpolate(frame, [0, 10], [100, 0], { extrapolateRight: 'clamp' });\n    const interiorPan = interpolate(frame, [0, duration], [-5, 5]);\n    return (\n      <AbsoluteFill style={{ overflow: 'hidden', transform: `translateX(${whipPan}%)` }}>\n        <Img src={assets.images[4]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `translateX(${interiorPan}%)` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene6 = () => {\n    const frame = useCurrentFrame();\n    const scaleSpring = spring({ frame, fps: 30, config: { damping: 12 }, durationInFrames: 90 });\n    const scale = interpolate(scaleSpring, [0, 1], [1, 1.2]);\n    return (\n      <AbsoluteFill style={{ overflow: 'hidden' }}>\n        <Img src={assets.images[5]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene7 = () => {\n    const frame = useCurrentFrame();\n    const duration = 180;\n    const scale = interpolate(frame, [0, duration], [1, 1.1]);\n    const opacity = interpolate(frame, [duration - 15, duration], [1, 0], { extrapolateLeft: 'clamp' });\n    return (\n      <AbsoluteFill style={{ overflow: 'hidden', opacity }}>\n        <Img src={assets.images[6]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale})` }} />\n      </AbsoluteFill>\n    );\n  };\n\n  const Scene8 = () => {\n    const frame = useCurrentFrame();\n    const duration = 192;\n    const scale = interpolate(frame, [0, duration], [1, 1.2]);\n    const translateY = interpolate(frame, [0, duration], [0, -40]);\n    const fadeOut = interpolate(frame, [duration - 15, duration], [1, 0], { extrapolateLeft: 'clamp' });\n    return (\n      <AbsoluteFill style={{ overflow: 'hidden', backgroundColor: 'black' }}>\n        <AbsoluteFill style={{ opacity: fadeOut }}>\n          <Img src={assets.images[7]} style={{ width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${scale}) translateY(${translateY}px)` }} />\n        </AbsoluteFill>\n      </AbsoluteFill>\n    );\n  };\n\n  return (\n    <AbsoluteFill style={{ backgroundColor: 'black' }}>\n      <Audio src={assets.voiceover} />\n      <Sequence from={0} durationInFrames={216}><Scene1 /></Sequence>\n      <Sequence from={216} durationInFrames={192}><Scene2 /></Sequence>\n      <Sequence from={408} durationInFrames={216}><Scene3 /></Sequence>\n      <Sequence from={624} durationInFrames={180}><Scene4 /></Sequence>\n      <Sequence from={804} durationInFrames={180}><Scene5 /></Sequence>\n      <Sequence from={984} durationInFrames={180}><Scene6 /></Sequence>\n      <Sequence from={1164} durationInFrames={180}><Scene7 /></Sequence>\n      <Sequence from={1344} durationInFrames={192}><Scene8 /></Sequence>\n    </AbsoluteFill>\n  );\n};",
+    durationInFrames: 1536,
+  },
+];
+
+// Memoized Video Card Component
+const VideoCard = ({
+  video,
+  videoSize,
+}: {
+  video: (typeof videos)[0];
+  videoSize: { width: number; height: number };
+}) => {
+  const Comp = useMemo(() => {
+    try {
+      let finalCode = video.code.replace(/^```(?:tsx?|jsx?)?\n?/, "");
+      finalCode = finalCode.replace(/\n?```\s*$/, "");
+      finalCode = extractComponentCode(finalCode);
+      const compilationResult = compileCode(finalCode || "");
+      return compilationResult.Component;
+    } catch (e) {
+      console.error("Compilation error:", e);
+      return null;
+    }
+  }, [video.code]);
+
+  if (!Comp) return null;
+
+  return (
+    <Paper
+      elevation={4}
+      sx={{
+        width: "100%",
+        maxWidth: 320,
+        aspectRatio: "9 / 16",
+        bgcolor: "rgba(26, 26, 46, 0.6)",
+        backdropFilter: "blur(10px)",
+        border: "1px solid rgba(139, 92, 246, 0.2)",
+        borderRadius: 3,
+        overflow: "hidden",
+        transition: "transform 0.2s",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          border: "1px solid rgba(139, 92, 246, 0.5)",
+        },
+      }}
+    >
+      <Player
+        component={Comp}
+        durationInFrames={video.durationInFrames}
+        compositionWidth={videoSize.width}
+        compositionHeight={videoSize.height}
+        fps={30}
+        controls
+        acknowledgeRemotionLicense
+        style={{
+          width: "100%",
+          height: "100%",
+        }}
+      />
+    </Paper>
+  );
+};
+
+export default function Showcase() {
+  const isMobile = useMediaQuery("(max-width:600px)");
+
+  // Default video size - made responsive
+  const videoSize = { width: 320, height: 550 };
+
+  return (
+    <Box sx={{ mt: { xs: 4, md: 6 } }}>
+      <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+        <HistoryIcon sx={{ color: "#a855f7", mr: 1.5 }} />
+        <Typography
+          variant={isMobile ? "h5" : "h4"}
+          fontWeight="bold"
+          sx={{ color: "#e2e8f0" }}
+        >
+          Showcase
+        </Typography>
+      </Box>
+      <Typography
+        variant="body2"
+        sx={{ color: "rgba(255,255,255,0.5)", mb: 4 }}
+      >
+        All videos were created using Grocerity
+      </Typography>
+
+      <Grid container spacing={3}>
+        {videos.map((video, index) => (
+          <Grid
+            key={index}
+            size={{ xs: 12, sm: 6, md: 3 }}
+            // display="flex"
+            // justifyContent="center"
+          >
+            <VideoCard video={video} videoSize={videoSize} />
+          </Grid>
+        ))}
+      </Grid>
+    </Box>
+  );
+}

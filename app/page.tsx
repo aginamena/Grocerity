@@ -35,6 +35,7 @@ import { renderMediaOnWeb } from "@remotion/web-renderer";
 import confetti from "canvas-confetti";
 import React, { useEffect, useState } from "react";
 import { extractComponentCode } from "./util";
+import Showcase from "@/components/Showcase";
 
 export default function Home() {
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -858,7 +859,7 @@ export default function Home() {
             </Box>
           )}
         </Paper>
-
+        <Showcase />
         {/* Footer */}
         <Typography
           variant="body2"
