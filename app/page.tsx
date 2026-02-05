@@ -9,6 +9,7 @@ import {
   FileDownload,
   PhotoLibrary,
   PlayCircle,
+  AutoFixHigh,
   VideoCall,
 } from "@mui/icons-material";
 import {
@@ -27,6 +28,7 @@ import {
   ListItemText,
   Paper,
   TextField,
+  Stack,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -294,6 +296,39 @@ export default function Home() {
     {
       text: "You grow your audience and increase sales through short-form video",
       color: "#4ade80",
+    },
+  ];
+  const PROMPT_TEMPLATES = [
+    {
+      label: "Fresh Arrival",
+      text: `Using the attached images, create a promotional video announcing a fresh arrival or new product now available in-store. Highlight freshness, quality, or uniqueness. End with a clear call to action telling viewers where and how to shop.
+
+Product Information:
+[Enter product name, category, and key highlights such as freshness, origin, seasonality, or brand]
+
+Availability:
+[Now available / Limited time / Seasonal]
+
+Call to Action (end of video):
+Phone: [Enter phone number]
+Address: [Enter store address]
+
+Additional Notes (optional):
+[Include tone, style, audience, or any other details to guide the video creation]`,
+    },
+    {
+      label: "Product(s) Spotlight",
+      text: `Using the attached images, create a promotional video highlighting the featured product(s). Emphasize the value of the special(s) and include a clear, compelling call to action that tells viewers exactly where and how to purchase.
+
+Product Information:
+[Enter product details, pricing, and any special offers here]
+
+Call to Action (end of video):
+Phone: [Enter phone number]
+Address: [Enter store address]
+
+Additional Notes (optional):
+[Include tone, style, audience, or any other details to guide the video creation]`,
     },
   ];
 
@@ -579,10 +614,51 @@ export default function Home() {
           >
             Describe Your Video
           </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              mb: 2,
+              color: "rgba(255, 255, 255, 0.5)",
+              fontSize: { xs: "0.8rem", sm: "0.875rem" },
+            }}
+          >
+            You can choose one of the templates below (and fill it up) or write
+            your own!
+          </Typography>
+          <Stack
+            direction="row"
+            spacing={1}
+            flexWrap="wrap"
+            useFlexGap
+            sx={{ mb: 2 }}
+          >
+            {PROMPT_TEMPLATES.map((template) => (
+              <Button
+                key={template.label}
+                variant="outlined"
+                size="small"
+                startIcon={<AutoFixHigh />}
+                onClick={() => setPrompt(template.text)}
+                disabled={loading}
+                sx={{
+                  color: "#a855f7",
+                  borderColor: "rgba(139, 92, 246, 0.4)",
+                  textTransform: "none",
+                  fontSize: { xs: "0.75rem", sm: "0.85rem" },
+                  "&:hover": {
+                    borderColor: "#8b5cf6",
+                    backgroundColor: "rgba(139, 92, 246, 0.1)",
+                  },
+                }}
+              >
+                {template.label}
+              </Button>
+            ))}
+          </Stack>
           <TextField
             fullWidth
             multiline
-            rows={isMobile ? 3 : 4}
+            rows={8}
             placeholder="E.g., Create a high-energy video ad showcasing these products with dynamic transitions. Include a call-to-action to visit our store..."
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
