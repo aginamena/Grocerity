@@ -92,7 +92,7 @@ const Pricing = () => {
             WebkitTextFillColor: "transparent",
           }}
         >
-          Choose Your Growth Plan
+          Choose Your Working Plan
         </Typography>
         <Typography
           variant="body1"
