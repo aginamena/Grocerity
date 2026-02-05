@@ -115,6 +115,7 @@ const Pricing = () => {
               elevation={tier.highlight ? 24 : 4}
               sx={{
                 height: "100%",
+                overflow: "visible",
                 background: "rgba(26, 26, 46, 0.6)",
                 backdropFilter: "blur(20px)",
                 borderRadius: 6,
@@ -155,9 +156,6 @@ const Pricing = () => {
                     zIndex: 2,
                   }}
                 >
-                  <Star
-                    sx={{ fontSize: 14, mr: 0.5, verticalAlign: "middle" }}
-                  />{" "}
                   Professional
                 </Box>
               )}
