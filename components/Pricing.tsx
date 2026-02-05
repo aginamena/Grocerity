@@ -23,22 +23,22 @@ const Pricing = () => {
       title: "Do It Yourself",
       price: "$30",
       period: "/month",
-      billing: "billed yearly ($360/yr)",
+      billing: "billed monthly",
       description:
-        "Perfect for single grocery stores starting with social video.",
+        "Perfect for those looking to create their own social videos quickly.",
       benefits: [
         "Unlimited HD Video Generations",
-        "AI-Powered Scripting",
-        "Standard AI Voiceovers",
-        "Up to 10 Images per video",
-        "No Watermarks",
-        "Standard Transitions",
+        "AI-Powered Scripting & Storytelling",
+        "Professional AI Voiceovers",
+        "Upload up to 10 Images per Video",
+        "No Watermarks on Your Content",
+        "Social Media Ready (9:16 Aspect Ratio)",
       ],
-      buttonText: "Start DIY",
+      buttonText: "Do It Yourself",
       highlight: false,
     },
     {
-      title: "Set and Forget",
+      title: "Set And Forget",
       price: "$199",
       period: "/month",
       billing: "billed monthly",
@@ -53,7 +53,7 @@ const Pricing = () => {
         "Custom Brand Style & Logo Overlay",
         "Priority Video Processing & Support",
       ],
-      buttonText: "Set and Forget",
+      buttonText: "Set And Forget. Coming Soon",
       highlight: true,
     },
     {
@@ -70,7 +70,7 @@ const Pricing = () => {
         "API Access for bulk video generation",
         "Whitelabeling options",
       ],
-      buttonText: "Contact Sales",
+      buttonText: "Coming Soon",
       highlight: false,
       icon: <Chat />,
     },
@@ -103,8 +103,8 @@ const Pricing = () => {
             mx: "auto",
           }}
         >
-          Whether you're a local grocer or a national chain, we have the tools
-          to boost your social media sales.
+          Whether you're a local grocer or a national chain, our platform will
+          help you create short form video content in minutes.
         </Typography>
       </Box>
 
