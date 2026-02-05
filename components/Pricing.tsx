@@ -25,7 +25,7 @@ const Pricing = () => {
       period: "/month",
       billing: "billed monthly",
       description:
-        "Perfect for those looking to create their own social videos quickly.",
+        "Perfect for those looking to create their own short form video content quickly.",
       benefits: [
         "Unlimited HD Video Generations",
         "AI-Powered Scripting & Storytelling",
