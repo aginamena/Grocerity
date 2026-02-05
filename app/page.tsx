@@ -255,7 +255,6 @@ export default function Home() {
       }, 250);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
-      console.log(err.message);
     } finally {
       setLoading(false);
     }
