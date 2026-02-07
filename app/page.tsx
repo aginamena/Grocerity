@@ -1,7 +1,10 @@
 "use client";
 
+import Pricing from "@/components/Pricing";
+import Showcase from "@/components/Showcase";
 import { compileCode } from "@/lib/remotion/compiler";
 import {
+  AutoFixHigh,
   CloudUpload,
   Delete,
   Description,
@@ -9,7 +12,6 @@ import {
   FileDownload,
   PhotoLibrary,
   PlayCircle,
-  AutoFixHigh,
   VideoCall,
 } from "@mui/icons-material";
 import {
@@ -27,8 +29,8 @@ import {
   ListItemIcon,
   ListItemText,
   Paper,
-  TextField,
   Stack,
+  TextField,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -37,7 +39,6 @@ import { renderMediaOnWeb } from "@remotion/web-renderer";
 import confetti from "canvas-confetti";
 import React, { useEffect, useState } from "react";
 import { extractComponentCode } from "./util";
-import Showcase from "@/components/Showcase";
 
 export default function Home() {
   const isMobile = useMediaQuery("(max-width:600px)");
@@ -98,6 +99,70 @@ export default function Home() {
       };
     });
   };
+
+  // const compressImage = (file: File): Promise<File> => {
+  //   return new Promise((resolve) => {
+  //     const reader = new FileReader();
+  //     reader.readAsDataURL(file);
+  //     reader.onload = (event) => {
+  //       const img = new Image();
+  //       img.src = event.target?.result as string;
+  //       img.onload = () => {
+  //         const canvas = document.createElement("canvas");
+
+  //         // The player dimensions are 320x550.
+  //         // We use 640x1100 (double size) for better quality,
+  //         // while maintaining the exact 320:550 vertical aspect ratio.
+  //         const targetWidth = 640;
+  //         const targetHeight = 1100;
+
+  //         let drawWidth,
+  //           drawHeight,
+  //           x = 0,
+  //           y = 0;
+  //         const imgRatio = img.width / img.height;
+  //         const targetRatio = targetWidth / targetHeight;
+
+  //         if (imgRatio > targetRatio) {
+  //           // Image is wider than the target ratio (landscape/square)
+  //           drawWidth = targetWidth;
+  //           drawHeight = targetWidth / imgRatio;
+  //           y = (targetHeight - drawHeight) / 2; // Center vertically
+  //         } else {
+  //           // Image is taller than the target ratio
+  //           drawHeight = targetHeight;
+  //           drawWidth = targetHeight * imgRatio;
+  //           x = (targetWidth - drawWidth) / 2; // Center horizontally
+  //         }
+
+  //         canvas.width = targetWidth;
+  //         canvas.height = targetHeight;
+  //         const ctx = canvas.getContext("2d");
+
+  //         if (ctx) {
+  //           // Fill background with a dark color for the bars (matching your site theme)
+  //           ctx.fillStyle = "#0a0a0a";
+  //           ctx.fillRect(0, 0, targetWidth, targetHeight);
+
+  //           // Draw the image scaled to "contain" within the target dimensions
+  //           ctx.drawImage(img, x, y, drawWidth, drawHeight);
+  //         }
+
+  //         canvas.toBlob(
+  //           (blob) => {
+  //             const compressedFile = new File([blob!], file.name, {
+  //               type: "image/jpeg",
+  //               lastModified: Date.now(),
+  //             });
+  //             resolve(compressedFile);
+  //           },
+  //           "image/jpeg",
+  //           0.8,
+  //         );
+  //       };
+  //     };
+  //   });
+  // };
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -308,6 +373,7 @@ export default function Home() {
       alert("Your video has downloaded!");
     } catch (err) {
       setError("Failed to download video. Please try again.");
+      console.log(err instanceof Error ? err.message : "Unknown error");
     }
   }
 
@@ -1012,6 +1078,7 @@ Additional Notes (optional):
           )}
         </Paper>
         <Showcase />
+        <Pricing />
         {/* Footer */}
         <Typography
           variant="body2"
