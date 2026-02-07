@@ -39,9 +39,15 @@ export const MyAnimation = () => {
 3. VISUALS: Use 'objectFit: cover' and crossOrigin="anonymous". No fade-in at frame 0 (Poster Frame). The last image must persist on screen after the durations end.
 
 4. TEXT OVERLAY STYLE:
-   - Position: bottom: 20%, max-width: 280px, centered horizontally.
-   - Typography: 'sans-serif', 900 weight, uppercase, word-break: 'break-word'.
+   - Position: bottom: 20%, width: 90%, left: '5%', textAlign: 'center'.
+   - Typography: 'sans-serif', 900 weight, uppercase, wordBreak: 'keep-all', overflowWrap: 'normal'.
+   - SHRINK TO FIT: If the text contains long words (e.g., >8 chars) or many words, reduce the fontSize (e.g., from 32px down to 20px) to ensure no word ever breaks into two lines.
    - Legibility: text-shadow: '2px 2px 0px #000, -1px -1px 0px #000, 1px -1px 0px #000, -1px 1px 0px #000'.
 
-5. SPRING ANIMATION PARAMS: { frame, fps, config, from, to, durationInFrames, delay, reverse }.
+5. SPRING ANIMATION PARAMS: { frame, fps, config, from, to, durationInFrames, delay, reverse }. The spring method returns a number. Only call methods compatible with number outputs.
+
+Note: 
+1) NEVER use a newline or break within a single word (e.g., "GEELAND" must always stay together). 
+2) If multiple words fit on one line at the chosen font size, they should stay on one line. Only wrap at spaces between words.
+3) Use a container that allows natural wrapping but prevents word-splitting.
 `

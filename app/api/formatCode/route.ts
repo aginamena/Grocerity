@@ -9,8 +9,7 @@ export async function POST(req: Request) {
       parser: "babel-ts",
       filepath: "dynamic-animation.tsx", // enables config + JSX heuristics
       semi: true,
-      singleQuote: true,
-      trailingComma: "all",
+      trailingComma: "none",
       printWidth: 90,
     });
 

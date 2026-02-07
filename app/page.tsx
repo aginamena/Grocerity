@@ -100,70 +100,6 @@ export default function Home() {
     });
   };
 
-  // const compressImage = (file: File): Promise<File> => {
-  //   return new Promise((resolve) => {
-  //     const reader = new FileReader();
-  //     reader.readAsDataURL(file);
-  //     reader.onload = (event) => {
-  //       const img = new Image();
-  //       img.src = event.target?.result as string;
-  //       img.onload = () => {
-  //         const canvas = document.createElement("canvas");
-
-  //         // The player dimensions are 320x550.
-  //         // We use 640x1100 (double size) for better quality,
-  //         // while maintaining the exact 320:550 vertical aspect ratio.
-  //         const targetWidth = 640;
-  //         const targetHeight = 1100;
-
-  //         let drawWidth,
-  //           drawHeight,
-  //           x = 0,
-  //           y = 0;
-  //         const imgRatio = img.width / img.height;
-  //         const targetRatio = targetWidth / targetHeight;
-
-  //         if (imgRatio > targetRatio) {
-  //           // Image is wider than the target ratio (landscape/square)
-  //           drawWidth = targetWidth;
-  //           drawHeight = targetWidth / imgRatio;
-  //           y = (targetHeight - drawHeight) / 2; // Center vertically
-  //         } else {
-  //           // Image is taller than the target ratio
-  //           drawHeight = targetHeight;
-  //           drawWidth = targetHeight * imgRatio;
-  //           x = (targetWidth - drawWidth) / 2; // Center horizontally
-  //         }
-
-  //         canvas.width = targetWidth;
-  //         canvas.height = targetHeight;
-  //         const ctx = canvas.getContext("2d");
-
-  //         if (ctx) {
-  //           // Fill background with a dark color for the bars (matching your site theme)
-  //           ctx.fillStyle = "#0a0a0a";
-  //           ctx.fillRect(0, 0, targetWidth, targetHeight);
-
-  //           // Draw the image scaled to "contain" within the target dimensions
-  //           ctx.drawImage(img, x, y, drawWidth, drawHeight);
-  //         }
-
-  //         canvas.toBlob(
-  //           (blob) => {
-  //             const compressedFile = new File([blob!], file.name, {
-  //               type: "image/jpeg",
-  //               lastModified: Date.now(),
-  //             });
-  //             resolve(compressedFile);
-  //           },
-  //           "image/jpeg",
-  //           0.8,
-  //         );
-  //       };
-  //     };
-  //   });
-  // };
-
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (selectedImages.length + files.length > 10) {
@@ -436,7 +372,7 @@ export default function Home() {
       color: "#a855f7",
     },
     {
-      text: "You grow your audience and increase sales through short-form video",
+      text: "You increase sales through our short-form video",
       color: "#4ade80",
     },
   ];
@@ -476,17 +412,12 @@ Additional Notes (optional):
 
   // Cycle through loading messages
   useEffect(() => {
-    if (!loading) {
-      setLoadingMessageIndex(0);
-      return;
-    }
-
     const interval = setInterval(() => {
       setLoadingMessageIndex((prev) => (prev + 1) % loadingMessages.length);
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [loading]);
+  }, [loadingMessages.length]);
 
   // Check for existing video on client mount
   useEffect(() => {
@@ -549,7 +480,7 @@ Additional Notes (optional):
             </Box>{" "}
             showcasing your products to{" "}
             <Box component="span" sx={highlightStyles.growSales}>
-              boost awareness, increase sales, and grow your audience!
+              boost awareness and increase sales!
             </Box>
           </Typography>
         </Box>
@@ -899,7 +830,6 @@ Additional Notes (optional):
                 variant="body2"
                 sx={{
                   color: "#fbbf24",
-                  mb: 3,
                   fontWeight: 500,
                   display: "flex",
                   alignItems: "center",
@@ -910,71 +840,6 @@ Additional Notes (optional):
                 ⏳ Creating a professional video can take up to 4 minutes...
                 Please be patient.
               </Typography>
-              <Typography
-                variant="subtitle2"
-                sx={{
-                  color: "rgba(255, 255, 255, 0.6)",
-                  mb: 2,
-                  fontWeight: 500,
-                }}
-              >
-                At Grocerity, our mission is to make sure that...
-              </Typography>
-              <Box
-                sx={{
-                  minHeight: { xs: 60, sm: 50 },
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography
-                  variant={isMobile ? "body1" : "h6"}
-                  sx={{
-                    color: loadingMessages[loadingMessageIndex].color,
-                    fontWeight: 600,
-                    transition: "all 0.5s ease-in-out",
-                    animation: "fadeInUp 0.5s ease-out",
-                    "@keyframes fadeInUp": {
-                      "0%": {
-                        opacity: 0,
-                        transform: "translateY(10px)",
-                      },
-                      "100%": {
-                        opacity: 1,
-                        transform: "translateY(0)",
-                      },
-                    },
-                  }}
-                  key={loadingMessageIndex}
-                >
-                  {loadingMessages[loadingMessageIndex].text}
-                </Typography>
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  gap: 1,
-                  mt: 2,
-                }}
-              >
-                {loadingMessages.map((_, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      backgroundColor:
-                        index === loadingMessageIndex
-                          ? loadingMessages[loadingMessageIndex].color
-                          : "rgba(255, 255, 255, 0.3)",
-                      transition: "all 0.3s ease",
-                    }}
-                  />
-                ))}
-              </Box>
             </Box>
           )}
 
@@ -1079,18 +944,96 @@ Additional Notes (optional):
         </Paper>
         <Showcase />
         <Pricing />
+        <Box sx={{ mt: 8, textAlign: "center", pb: 4 }}>
+          <Typography
+            variant="subtitle2"
+            sx={{
+              color: "rgba(255, 255, 255, 0.5)",
+              mb: 3,
+              fontWeight: 500,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              fontSize: "0.75rem",
+            }}
+          >
+            At Grocerity, our mission is to make sure that...
+          </Typography>
+
+          <Box
+            sx={{
+              minHeight: { xs: 80, sm: 100 },
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              px: { xs: 2, md: 4 },
+            }}
+          >
+            <Typography
+              variant={isMobile ? "h6" : "h4"}
+              sx={{
+                color: loadingMessages[loadingMessageIndex].color,
+                fontWeight: 700,
+                transition: "color 0.4s ease",
+                animation: "slideIn 0.4s ease-out",
+                lineHeight: 1.4,
+                "@keyframes slideIn": {
+                  "0%": { opacity: 0, transform: "translateY(15px)" },
+                  "100%": { opacity: 1, transform: "translateY(0)" },
+                },
+              }}
+              key={loadingMessageIndex}
+            >
+              {loadingMessages[loadingMessageIndex].text}
+            </Typography>
+          </Box>
+
+          {/* Styled Indicators */}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: 1.5,
+              mt: 4,
+            }}
+          >
+            {loadingMessages.map((_, index) => (
+              <Box
+                key={index}
+                sx={{
+                  width: index === loadingMessageIndex ? 24 : 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor:
+                    index === loadingMessageIndex
+                      ? loadingMessages[loadingMessageIndex].color
+                      : "rgba(255, 255, 255, 0.2)",
+                  transition: "all 0.4s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              />
+            ))}
+          </Box>
+        </Box>
+
         {/* Footer */}
         <Typography
           variant="body2"
           sx={{
             textAlign: "center",
-            mt: { xs: 3, md: 5 },
-            color: "rgba(255, 255, 255, 0.5)",
+            mt: 4,
+            color: "rgba(255, 255, 255, 0.4)",
             fontStyle: "italic",
-            fontSize: { xs: "0.875rem", sm: "1rem" },
+            fontSize: "0.875rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1,
           }}
         >
-          Grocerity is made with love ❤️
+          Grocerity is made with love{" "}
+          <Box component="span" sx={{ color: "#f43f5e" }}>
+            ❤️
+          </Box>
         </Typography>
       </Container>
     </Box>
