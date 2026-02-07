@@ -194,70 +194,146 @@ export default function Home() {
       setError("Please describe your video.");
       return;
     }
-    setImagePreviews([]);
-    setSelectedImages([]);
-    setPrompt("");
+
     setLoading(true);
     setError(null);
 
-    try {
-      const uploadFormData = new FormData();
-      selectedImages.forEach((img) => {
-        uploadFormData.append("images", img);
-      });
-      uploadFormData.append("prompt", prompt);
+    const imagesToProcess = [...selectedImages];
+    const originalPrompt = prompt;
+    let attempts = 0;
+    const maxAttempts = 3;
+    let success = false;
+    let lastError = "";
+    let lastCode = "";
+    let finalDuration = "150";
 
-      const request = await fetch("/api/generate_video", {
-        method: "POST",
-        body: uploadFormData,
-      });
+    while (attempts < maxAttempts && !success) {
+      attempts++;
+      try {
+        let currentIterCode = "";
+        let currentIterDuration = "150";
 
-      if (!request.ok) {
-        throw new Error("Failed to generate video");
+        if (attempts === 1) {
+          // First attempt: Regular generation
+          const uploadFormData = new FormData();
+          imagesToProcess.forEach((img) =>
+            uploadFormData.append("images", img),
+          );
+          uploadFormData.append("prompt", originalPrompt);
+
+          const request = await fetch("/api/generateVideo", {
+            // Updated path to match folder name
+            method: "POST",
+            body: uploadFormData,
+          });
+
+          if (!request.ok) {
+            const errorText = await request.text();
+            throw new Error(`Initial generation failed: ${errorText}`);
+          }
+
+          const response = await request.json();
+          const parsedResponse = JSON.parse(response.result); // response.result is a stringified JSON from Gemini
+          currentIterCode = parsedResponse.code;
+          currentIterDuration =
+            parsedResponse.durationInFrames?.toString() || "150";
+        } else {
+          // Subsequent attempts: Use the dedicated Fix API
+          const fixRequest = await fetch("/api/fixCodeErrors", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: lastCode, error: lastError }),
+          });
+
+          if (!fixRequest.ok) throw new Error("Fix attempt failed");
+          const fixResponse = await fixRequest.json();
+          // The fix API returns { result: '{"code": "...", "explanation": "..."}' } based on your route implementation
+          const parsedFix = JSON.parse(fixResponse.result);
+          currentIterCode = parsedFix.code;
+          currentIterDuration = lastCode ? finalDuration : "150"; // Keep previous duration or default
+        }
+
+        // Clean and prepare code
+        let cleanedCode = currentIterCode
+          .replace(/^```(?:tsx?|jsx?)?\n?/, "")
+          .replace(/\n?```\s*$/, "");
+        cleanedCode = extractComponentCode(cleanedCode);
+        // Format code using the specialized API
+        try {
+          const formatRequest = await fetch("/api/formatCode", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ code: cleanedCode }),
+          });
+
+          if (formatRequest.ok) {
+            const formatResponse = await formatRequest.json();
+            cleanedCode = formatResponse.formatted;
+          }
+        } catch (formatErr) {
+          console.warn("Formatting failed, using raw code:", formatErr);
+        }
+
+        lastCode = cleanedCode;
+
+        // Validate the code via compilation
+        const compilation = compileCode(cleanedCode);
+        if (compilation.error) {
+          console.warn(
+            `Attempt ${attempts} failed validation:`,
+            compilation.error,
+          );
+          lastError = compilation.error;
+          continue;
+        }
+
+        // SUCCESS: Update state and storage
+        setImagePreviews([]);
+        setSelectedImages([]);
+        setPrompt("");
+
+        sessionStorage.setItem("createdCode", cleanedCode);
+        sessionStorage.setItem("durationInFrames", currentIterDuration);
+        setHasGeneratedVideo(true);
+        success = true;
+
+        // 🎉 Celebratory confetti
+        confetti({
+          particleCount: 150,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ["#8b5cf6", "#a855f7", "#d946ef", "#4ade80", "#38bdf8"],
+        });
+
+        setTimeout(() => {
+          confetti({
+            particleCount: 100,
+            angle: 60,
+            spread: 55,
+            origin: { x: 0 },
+            colors: ["#8b5cf6", "#a855f7", "#d946ef"],
+          });
+          confetti({
+            particleCount: 100,
+            angle: 120,
+            spread: 55,
+            origin: { x: 1 },
+            colors: ["#8b5cf6", "#a855f7", "#d946ef"],
+          });
+        }, 250);
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : "Unknown error";
+        console.error(`Attempt ${attempts} error:`, lastError);
       }
-      const response = await request.json();
-      const parsedResponse = JSON.parse(response.result);
-      let finalCode = parsedResponse.code.replace(/^```(?:tsx?|jsx?)?\n?/, "");
-      finalCode = finalCode.replace(/\n?```\s*$/, "");
-      finalCode = extractComponentCode(finalCode);
-
-      sessionStorage.setItem("createdCode", finalCode.toString());
-      sessionStorage.setItem(
-        "durationInFrames",
-        parsedResponse.durationInFrames?.toString() || "150",
-      );
-      setHasGeneratedVideo(true);
-
-      // 🎉 Trigger confetti celebration
-      confetti({
-        particleCount: 150,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ["#8b5cf6", "#a855f7", "#d946ef", "#4ade80", "#38bdf8"],
-      });
-
-      // Fire confetti from both sides for extra celebration
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          angle: 60,
-          spread: 55,
-          origin: { x: 0 },
-          colors: ["#8b5cf6", "#a855f7", "#d946ef"],
-        });
-        confetti({
-          particleCount: 100,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1 },
-          colors: ["#8b5cf6", "#a855f7", "#d946ef"],
-        });
-      }, 250);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Unknown error");
-    } finally {
-      setLoading(false);
     }
+
+    if (!success) {
+      setError(
+        `Failed to generate a valid video after ${maxAttempts} attempts. Last error: ${lastError}`,
+      );
+    }
+
+    setLoading(false);
   }
 
   function Component(): React.ComponentType {

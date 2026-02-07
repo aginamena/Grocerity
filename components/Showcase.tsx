@@ -1,9 +1,9 @@
 import { Box, Typography, Paper, useMediaQuery, Grid } from "@mui/material";
 import { History as HistoryIcon } from "@mui/icons-material";
-import { Player } from "@remotion/player";
+import { Player, PlayerRef } from "@remotion/player";
 import { compileCode } from "@/lib/remotion/compiler";
 import { extractComponentCode } from "@/app/util";
-import React, { useMemo } from "react";
+import React, { useMemo, useRef, useEffect, useState } from "react";
 
 // Keep your hardcoded videos here for now
 const videos = [
@@ -41,10 +41,36 @@ const videos = [
 const VideoCard = ({
   video,
   videoSize,
+  isPlaying,
+  onPlay,
 }: {
   video: (typeof videos)[0];
   videoSize: { width: number; height: number };
+  isPlaying: boolean;
+  onPlay: () => void;
 }) => {
+  const playerRef = useRef<PlayerRef>(null);
+
+  useEffect(() => {
+    if (!isPlaying && playerRef.current?.isPlaying()) {
+      playerRef.current.pause();
+    }
+  }, [isPlaying]);
+
+  useEffect(() => {
+    const player = playerRef.current;
+    if (!player) return;
+
+    const handlePlay = () => {
+      onPlay();
+    };
+
+    player.addEventListener("play", handlePlay);
+    return () => {
+      player.removeEventListener("play", handlePlay);
+    };
+  }, [onPlay]);
+
   const Comp = useMemo(() => {
     try {
       let finalCode = video.code.replace(/^```(?:tsx?|jsx?)?\n?/, "");
@@ -80,6 +106,7 @@ const VideoCard = ({
       }}
     >
       <Player
+        ref={playerRef}
         component={Comp}
         durationInFrames={video.durationInFrames}
         compositionWidth={videoSize.width}
@@ -98,6 +125,7 @@ const VideoCard = ({
 
 export default function Showcase() {
   const isMobile = useMediaQuery("(max-width:600px)");
+  const [playingIndex, setPlayingIndex] = useState<number | null>(null);
 
   // Default video size - made responsive
   const videoSize = { width: 320, height: 550 };
@@ -123,13 +151,13 @@ export default function Showcase() {
 
       <Grid container spacing={3}>
         {videos.map((video, index) => (
-          <Grid
-            key={index}
-            size={{ xs: 12, sm: 6, md: 3 }}
-            // display="flex"
-            // justifyContent="center"
-          >
-            <VideoCard video={video} videoSize={videoSize} />
+          <Grid key={index} size={{ xs: 12, sm: 6, md: 3 }}>
+            <VideoCard
+              video={video}
+              videoSize={videoSize}
+              isPlaying={playingIndex === index}
+              onPlay={() => setPlayingIndex(index)}
+            />
           </Grid>
         ))}
       </Grid>
