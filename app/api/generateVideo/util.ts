@@ -58,7 +58,7 @@ export async function generateRemotionCode(design: DesignWithUrls) {
     },
   });
   trace.end();
-  await client.flush();
+  client.flush();
   return {code: result, cost: totalCost};
 }
 
@@ -83,6 +83,40 @@ export async function AddVoiceoverURLsAndImageURLsToDesign(
   return result;
 }
 
+/**
+ * Refines the generated image to fix spelling, grammatical, or styling errors.
+ */
+async function fixVisualErrors(imageBase64: string, mimeType: string, script : string): Promise<{ data: string, cost: number }> {
+  const result = await genai.models.generateContent({
+    model: "gemini-2.5-flash-image",
+    contents: [
+      { text: `Carefully inspect this image. This image was generated based on this voiceover segment: "${script}". Fix any spelling mistakes in labels, grammatical errors on packaging, or unnatural styling artifacts. Ensure the final image is polished, professional, and accurately reflects the provided context.` },
+      { inlineData: { mimeType, data: imageBase64 } }
+    ],
+    config: {
+      systemInstruction: `
+Role: Quality Control Specialist for Global Advertising.
+Task: Identify and fix visual defects in the product image.
+Directives:
+1. Grammar & Spelling: Correct any mangled text, typos, or nonsensical characters on products or backgrounds.
+2. Styling Integrity: Fix unnatural proportions, weird reflections, orAI artifacts (e.g., extra fingers if people are present, warped textures).
+3. Consistency: Maintain the high-end "Hero" aesthetic while ensuring technical perfection.
+Output: Return ONLY the corrected high-fidelity 9:16 visual.
+`,
+      responseModalities: ['IMAGE'],
+    }
+  });
+
+  const inputCosts = ((result?.usageMetadata?.promptTokenCount || 0) / 1000000) * 0.3;
+  const outputCosts = (((result?.usageMetadata?.totalTokenCount || 0) - (result?.usageMetadata?.promptTokenCount || 0)) / 1000000) * 30.0;
+  
+  const imagePart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
+  return { 
+    data: imagePart?.inlineData?.data || imageBase64, 
+    cost: inputCosts + outputCosts 
+  };
+}
+
 
 /**
  * Enhances images based on VO and uploads ONLY the cleaned versions to storage.
@@ -90,6 +124,7 @@ export async function AddVoiceoverURLsAndImageURLsToDesign(
 export async function enhanceAndUploadImages(design: Design, files: File[]): Promise<{urls:string[], cost:number}> {
   const cleanedUrls: string[] = [];
   let result = null;
+  let totalCost = 0;
 
   for (let i = 0; i < files.length; i++) {
     const file = files[i];
@@ -103,7 +138,7 @@ export async function enhanceAndUploadImages(design: Design, files: File[]): Pro
       result = await genai.models.generateContent({
         model: "gemini-2.5-flash-image",
         contents: [
-          { text: `Enhance this image to perfectly match this voiceover segment: "${script}". Make it scroll-stopping, jaw dropping, attention grabbing, go now to the store to buy this product` },
+          { text: `Enhance this image to perfectly match this voiceover segment: "${script}". Make it scroll-stopping, jaw dropping, attention grabbing, go now to the store to buy this product. If you include any words, it should be 3 words maximum on an image, that's if you choose to include any.` },
           { inlineData: { mimeType: file.type, data: base64 } }
         ],
         config: {
@@ -111,10 +146,10 @@ export async function enhanceAndUploadImages(design: Design, files: File[]): Pro
 Role: Elite Master of Retail Consumer Psychology.
 Task: Transform this image into a premium 9:16 commercial "Hero" visual that triggers an immediate urge to buy.
 Directives:
-1. Lighting & Color: Use dramatic "Hero Lighting," hyper-vibrant color grading, and sharp contrast for a 3D effect.
-2. Absolute Visual Focus: DO NOT include any text overlays, diagrams, or callouts. The imagery must be pure and speak for itself.
-3. Irresistibility: Elevate textures and focus to make the product look exceptionally high-end and desirable.
-Output: Return ONLY the transformed high-fidelity 9:16 visual with zero text or graphical overlays.
+1. Luminous Clarity: Use extremely bright, clean, and high-key lighting. Ensure every detail is razor-sharp and colors are hyper-vibrant for a polished, professional look.
+2. Impactful Simplicity: Use text overlays or minimal diagrams ONLY when critical to highlight a key benefit. Text MUST be 1-3 words maximum (e.g., "75% More Power", "Instant Results", "100% Organic").
+3. Irresistibility: Elevate textures and focus to make the product look exceptionally high-end, polished, and jaw-dropping.
+Output: Return ONLY the transformed high-fidelity 9:16 visual.
 `,
           responseModalities: ['IMAGE'],
           imageConfig: { aspectRatio: "9:16" }
@@ -123,7 +158,10 @@ Output: Return ONLY the transformed high-fidelity 9:16 visual with zero text or 
 
       const imagePart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
       if (imagePart?.inlineData?.data) {
-        const cleanedBuffer = Buffer.from(imagePart.inlineData.data, "base64");
+        const { data: fixedBase64, cost:fixCost } = await fixVisualErrors(imagePart.inlineData.data, file.type, script);
+        totalCost += fixCost;
+
+        const cleanedBuffer = Buffer.from(fixedBase64, "base64");
         const filePath = `cleaned/${Date.now()}-${i}.${file.type.split('/')[1]}`;
         
         await supabase.storage.from("images").upload(filePath, cleanedBuffer, { contentType: file.type });
@@ -142,7 +180,7 @@ Output: Return ONLY the transformed high-fidelity 9:16 visual with zero text or 
 
     const inputCosts = ((result?.usageMetadata?.promptTokenCount || 0) / 1000000) * 0.3;
     const outputCosts = (((result?.usageMetadata?.totalTokenCount || 0) - (result?.usageMetadata?.promptTokenCount || 0)) / 1000000) * 30.0;
-    const totalCost = (inputCosts + outputCosts);
+    totalCost += (inputCosts + outputCosts);
 
   // Trace logging into opik
   const trace = client.trace({
@@ -166,7 +204,7 @@ Output: Return ONLY the transformed high-fidelity 9:16 visual with zero text or 
  
   })
   trace.end()
-  await client.flush()
+   client.flush()
 
   return {urls: cleanedUrls, cost:totalCost};
 }
@@ -264,7 +302,7 @@ export async function generateDesign(prompt: string, files: File[]) {
  
   })
   trace.end()
-  await client.flush()
+   client.flush()
     return {design: result, cost: totalCost};
 }
 
@@ -365,7 +403,7 @@ async function convertVoiceoverToPublicUrl(script: string, voiceName: string = '
  
   })
   trace.end()
-  await client.flush()
+  client.flush()
     return {url: data.publicUrl, cost: totalCost};
   } catch (err) {
     console.error('convertVoiceoverToPublicUrl error:', err);

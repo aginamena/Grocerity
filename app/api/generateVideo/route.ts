@@ -38,7 +38,7 @@ export async function POST(req: Request) {
  
   })
   trace.end()
-  await client.flush()
+  client.flush()
 
     return NextResponse.json({
       result: remotionCode,
