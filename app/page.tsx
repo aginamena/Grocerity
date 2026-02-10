@@ -134,7 +134,6 @@ export default function Home() {
     setLoading(true);
     setError(null);
 
-    const imagesToProcess = [...selectedImages];
     const originalPrompt = prompt;
     let attempts = 0;
     const maxAttempts = 3;
@@ -152,9 +151,7 @@ export default function Home() {
         if (attempts === 1) {
           // First attempt: Regular generation
           const uploadFormData = new FormData();
-          imagesToProcess.forEach((img) =>
-            uploadFormData.append("images", img),
-          );
+          selectedImages.forEach((img) => uploadFormData.append("images", img));
           uploadFormData.append("prompt", originalPrompt);
 
           const request = await fetch("/api/generateVideo", {
@@ -837,7 +834,7 @@ Additional Notes (optional):
                   gap: 1,
                 }}
               >
-                ⏳ Creating a professional video can take up to 4 minutes...
+                ⏳ Creating a professional video can take a few minutes...
                 Please be patient.
               </Typography>
             </Box>
@@ -935,7 +932,7 @@ Additional Notes (optional):
                     gap: 1,
                   }}
                 >
-                  ⏳ Downloading your video can take up to 1 minute... Please be
+                  ⏳ Downloading your video can take a few minutes... Please be
                   patient.
                 </Typography>
               )}

@@ -21,7 +21,7 @@ const Pricing = () => {
   const tiers = [
     {
       title: "Do It Yourself",
-      price: "$30",
+      price: "$35",
       period: "/month",
       billing: "billed monthly",
       description:
