@@ -49,5 +49,5 @@ export const MyAnimation = () => {
 
 Note: 
 1) If you are using interpolate for animation, ensure the input range and output range have the same length. These ranges should contain only numbers.
-2) Do not call absoluteFill instead a style object like this. style={{...AbsoluteFill(), ...}} in your code because it doesn't work!
+2) AbsoluteFill is a component from Remotion. Do not spread this component. This is incorrect because AbsoluteFill is a component, not a style object. You should instead use it directly as a wrapper component.
 `

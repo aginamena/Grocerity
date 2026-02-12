@@ -84,41 +84,6 @@ export async function AddVoiceoverURLsAndImageURLsToDesign(
 }
 
 /**
- * Refines the generated image to fix spelling, grammatical, or styling errors.
- */
-async function fixVisualErrors(imageBase64: string, mimeType: string, script : string): Promise<{ data: string, cost: number }> {
-  const result = await genai.models.generateContent({
-    model: "gemini-2.5-flash-image",
-    contents: [
-      { text: `Carefully inspect this image. This image was generated based on this voiceover segment: "${script}". Fix any spelling mistakes in labels, grammatical errors on packaging, or unnatural styling artifacts. Ensure the final image is polished, professional, and accurately reflects the provided context.` },
-      { inlineData: { mimeType, data: imageBase64 } }
-    ],
-    config: {
-      systemInstruction: `
-Role: Quality Control Specialist for Global Advertising.
-Task: Identify and fix visual defects in the product image.
-Directives:
-1. Grammar & Spelling: Correct any mangled text, typos, or nonsensical characters on products or backgrounds.
-2. Styling Integrity: Fix unnatural proportions, weird reflections, orAI artifacts (e.g., extra fingers if people are present, warped textures).
-3. Consistency: Maintain the high-end "Hero" aesthetic while ensuring technical perfection.
-Output: Return ONLY the corrected high-fidelity 9:16 visual.
-`,
-      responseModalities: ['IMAGE'],
-    }
-  });
-
-  const inputCosts = ((result?.usageMetadata?.promptTokenCount || 0) / 1000000) * 0.3;
-  const outputCosts = (((result?.usageMetadata?.totalTokenCount || 0) - (result?.usageMetadata?.promptTokenCount || 0)) / 1000000) * 30.0;
-  
-  const imagePart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
-  return { 
-    data: imagePart?.inlineData?.data || imageBase64, 
-    cost: inputCosts + outputCosts 
-  };
-}
-
-
-/**
  * Enhances images based on VO and uploads ONLY the cleaned versions to storage.
  */
 export async function enhanceAndUploadImages(design: Design, files: File[]): Promise<{urls:string[], cost:number}> {
@@ -136,20 +101,21 @@ export async function enhanceAndUploadImages(design: Design, files: File[]): Pro
       const base64 = Buffer.from(buffer).toString("base64");
 
       result = await genai.models.generateContent({
-        model: "gemini-2.5-flash-image",
+        model: "gemini-3-pro-image-preview",
         contents: [
-          { text: `Enhance this image to perfectly match this voiceover segment: "${script}". Make it scroll-stopping, jaw dropping, attention grabbing, go now to the store to buy this product. If you include any words, it should be 3 words maximum on an image, that's if you choose to include any.` },
+          { text: `Enhance this image to perfectly match this voiceover segment: "${script}". Make it scroll-stopping, jaw dropping, attention grabbing, go now to the store to buy this product. This is the kind of feeling a viewer should have after seeing the image.` },
           { inlineData: { mimeType: file.type, data: base64 } }
         ],
         config: {
           systemInstruction: `
-Role: Elite Master of Retail Consumer Psychology.
-Task: Transform this image into a premium 9:16 commercial "Hero" visual that triggers an immediate urge to buy.
+Role: World-Class Creative Director & Retail Psychologist.
+Task: Engineering "The Buy Trigger" – transform input into a 9:16 masterpiece that stops the scroll and empties the shelves.
 Directives:
-1. Luminous Clarity: Use extremely bright, clean, and high-key lighting. Ensure every detail is razor-sharp and colors are hyper-vibrant for a polished, professional look.
-2. Impactful Simplicity: Use text overlays or minimal diagrams ONLY when critical to highlight a key benefit. Text MUST be 1-3 words maximum (e.g., "75% More Power", "Instant Results", "100% Organic").
-3. Irresistibility: Elevate textures and focus to make the product look exceptionally high-end, polished, and jaw-dropping.
-Output: Return ONLY the transformed high-fidelity 9:16 visual.
+1. Cinematic Brilliance: Use "God-tier" lighting (pristine, high-key, luminous). Every pixel must be razor-sharp. Enhance colors to be hyper-vibrant but premium.
+2. Psychological Persuasion: Use high-impact text overlays, callouts, or diagrams ONLY if they make the product's benefit undeniably clear and desirable. The visuals should feel like a multi-million dollar ad campaign.
+3. Sensory Appeal: Make textures feel touchable (e.g., condensation on a bottle, soft fabric, crisp electronics). The product must look like the most desirable version of itself in existence.
+Output: Return ONLY the final high-fidelity 9:16 visual.
+Note: Do not clutter the screen with text or diagrams. A few words is better
 `,
           responseModalities: ['IMAGE'],
           imageConfig: { aspectRatio: "9:16" }
@@ -158,28 +124,31 @@ Output: Return ONLY the transformed high-fidelity 9:16 visual.
 
       const imagePart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
       if (imagePart?.inlineData?.data) {
-        const { data: fixedBase64, cost:fixCost } = await fixVisualErrors(imagePart.inlineData.data, file.type, script);
-        totalCost += fixCost;
+        // const { data: fixedBase64, cost:fixCost } = await fixVisualErrors(imagePart.inlineData.data, file.type, script);
+        // totalCost += fixCost;
 
-        const cleanedBuffer = Buffer.from(fixedBase64, "base64");
+        // const cleanedBuffer = Buffer.from(fixedBase64, "base64");
+        const cleanedBuffer = Buffer.from(imagePart.inlineData.data, "base64");
         const filePath = `cleaned/${Date.now()}-${i}.${file.type.split('/')[1]}`;
         
         await supabase.storage.from("images").upload(filePath, cleanedBuffer, { contentType: file.type });
         const { data } = supabase.storage.from("images").getPublicUrl(filePath);
         cleanedUrls.push(data.publicUrl);
-        continue;
+      }
+      else{
+       throw new Error(`Critical Error: Image enhancement failed for segment ${i}.`);
       }
     } catch (e) {
       console.error(`Enhancement failed for image ${i}, uploading original as fallback.`);
     }
 
     // Fallback: If enhancement fails, upload original now to ensure we have a URL
-    const [fallbackUrl] = await uploadImages([file]);
-    cleanedUrls.push(fallbackUrl);
+    // const [fallbackUrl] = await uploadImages([file]);
+    // cleanedUrls.push(fallbackUrl);
   }
 
-    const inputCosts = ((result?.usageMetadata?.promptTokenCount || 0) / 1000000) * 0.3;
-    const outputCosts = (((result?.usageMetadata?.totalTokenCount || 0) - (result?.usageMetadata?.promptTokenCount || 0)) / 1000000) * 30.0;
+    const inputCosts = ((result?.usageMetadata?.promptTokenCount || 0) / 1000000) * 2.0; // Updated to $2.00
+    const outputCosts = (((result?.usageMetadata?.totalTokenCount || 0) - (result?.usageMetadata?.promptTokenCount || 0)) / 1000000) * 120.0; // Updated to $120.00 for images
     totalCost += (inputCosts + outputCosts);
 
   // Trace logging into opik
@@ -187,7 +156,7 @@ Output: Return ONLY the transformed high-fidelity 9:16 visual.
     name: "enhanceAndUploadImages",
   output: {response:cleanedUrls},
     metadata:{
-      model: "gemini-2.5-flash-image",
+      model: "gemini-3-pro-image-preview",
         tokens: {
           inputTokens: result?.usageMetadata?.promptTokenCount,
           outputTokens: result?.usageMetadata?.candidatesTokenCount,
