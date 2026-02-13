@@ -124,10 +124,6 @@ Note: Do not clutter the screen with text or diagrams. A few words is better
 
       const imagePart = result.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
       if (imagePart?.inlineData?.data) {
-        // const { data: fixedBase64, cost:fixCost } = await fixVisualErrors(imagePart.inlineData.data, file.type, script);
-        // totalCost += fixCost;
-
-        // const cleanedBuffer = Buffer.from(fixedBase64, "base64");
         const cleanedBuffer = Buffer.from(imagePart.inlineData.data, "base64");
         const filePath = `cleaned/${Date.now()}-${i}.${file.type.split('/')[1]}`;
         
@@ -275,31 +271,31 @@ export async function generateDesign(prompt: string, files: File[]) {
     return {design: result, cost: totalCost};
 }
 
-export async function uploadImages(files: File[]){
-        const uploadedUrls: string[] = [];
+// export async function uploadImages(files: File[]){
+//         const uploadedUrls: string[] = [];
     
-        for (const file of files) {
-          const fileExtension = file.name.split(".").pop();
-          const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExtension}`;
-          const filePath = `images/${fileName}`;
+//         for (const file of files) {
+//           const fileExtension = file.name.split(".").pop();
+//           const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}.${fileExtension}`;
+//           const filePath = `images/${fileName}`;
     
-          const buffer = await file.arrayBuffer();
+//           const buffer = await file.arrayBuffer();
     
-          const { data, error } = await supabase.storage
-            .from("images")
-            .upload(filePath, buffer, {
-              contentType: file.type,
-              upsert: false,
-            });
-          // Get public URL
-          const { data: publicUrl } = supabase.storage
-            .from("images")
-            .getPublicUrl(filePath);
+//           const { data, error } = await supabase.storage
+//             .from("images")
+//             .upload(filePath, buffer, {
+//               contentType: file.type,
+//               upsert: false,
+//             });
+//           // Get public URL
+//           const { data: publicUrl } = supabase.storage
+//             .from("images")
+//             .getPublicUrl(filePath);
     
-          uploadedUrls.push(publicUrl.publicUrl);
-        }
-        return uploadedUrls;
-}
+//           uploadedUrls.push(publicUrl.publicUrl);
+//         }
+//         return uploadedUrls;
+// }
 
 async function convertVoiceoverToPublicUrl(script: string, voiceName: string = 'Kore'): Promise<{url: string, cost: number}> {
   try {
