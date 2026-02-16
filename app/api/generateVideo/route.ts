@@ -42,6 +42,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({
       result: remotionCode,
+      design: designWithUrls,
     });
   } catch (error) {
     console.error("Video Generation Error:", error);

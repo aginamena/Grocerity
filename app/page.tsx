@@ -52,6 +52,10 @@ export default function Home() {
   const [hasGeneratedVideo, setHasGeneratedVideo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
+  //for edits
+  const [currentDesign, setCurrentDesign] = useState<any>(null);
+  const [editPrompt, setEditPrompt] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   const compressImage = (file: File): Promise<File> => {
     return new Promise((resolve) => {
@@ -120,7 +124,7 @@ export default function Home() {
     setImagePreviews(newImages.map((f) => URL.createObjectURL(f)));
   };
 
-  async function generateDesign() {
+  async function generateVideo() {
     if (selectedImages.length === 0) {
       setError("Please upload at least one image.");
       return;
@@ -166,6 +170,7 @@ export default function Home() {
           }
 
           const response = await request.json();
+          setCurrentDesign(response.design);
           const parsedResponse = JSON.parse(response.result); // response.result is a stringified JSON from Gemini
           currentIterCode = parsedResponse.code;
           currentIterDuration =
@@ -269,6 +274,49 @@ export default function Home() {
     setLoading(false);
   }
 
+  async function handleEditVideo() {
+    if (!editPrompt.trim()) {
+      setError("Please describe what you want to change.");
+      return;
+    }
+
+    setLoading(true);
+    setIsEditing(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/editVideo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          design: currentDesign,
+          editPrompt: editPrompt,
+        }),
+      });
+
+      if (!response.ok) throw new Error("Edit request failed");
+
+      const { design, result } = await response.json();
+      const parsedResult = JSON.parse(result);
+      let cleanedCode = parsedResult.code
+        .replace(/^```(?:tsx?|jsx?)?\n?/, "")
+        .replace(/\n?```\s*$/, "");
+      cleanedCode = extractComponentCode(cleanedCode);
+
+      sessionStorage.setItem("createdCode", cleanedCode);
+      sessionStorage.setItem(
+        "durationInFrames",
+        parsedResult.durationInFrames.toString(),
+      );
+      setCurrentDesign(design);
+      setEditPrompt("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to edit video");
+    } finally {
+      setLoading(false);
+      setIsEditing(false);
+    }
+  }
   function Component(): React.ComponentType {
     if (typeof window === "undefined") return () => null;
     const code = sessionStorage.getItem("createdCode");
@@ -782,7 +830,7 @@ Additional Notes (optional):
             variant="contained"
             size={isMobile ? "medium" : "large"}
             fullWidth
-            onClick={generateDesign}
+            onClick={generateVideo}
             disabled={loading || selectedImages.length === 0}
             startIcon={
               loading ? (
@@ -918,6 +966,50 @@ Additional Notes (optional):
               >
                 {downloading ? "Downloading..." : "Download Video"}
               </Button>
+              <Box sx={{ mt: 4, width: "100%", maxWidth: 500, mx: "auto" }}>
+                <Typography
+                  variant="h6"
+                  sx={{ color: "#e2e8f0", mb: 1, textAlign: "left" }}
+                >
+                  Want to change something?
+                </Typography>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={4}
+                  placeholder="e.g, Change the address to 123 Main St. or I don't like the 5th caption, remove it from the image."
+                  value={editPrompt}
+                  onChange={(e) => setEditPrompt(e.target.value)}
+                  sx={{
+                    mb: 2,
+                    background: "rgba(255, 255, 255, 0.05)",
+                    "& .MuiOutlinedInput-root": { color: "white" },
+                  }}
+                />
+                <Button
+                  fullWidth
+                  variant="outlined"
+                  startIcon={
+                    isEditing ? (
+                      <CircularProgress size={20} color="inherit" />
+                    ) : (
+                      <AutoFixHigh />
+                    )
+                  }
+                  disabled={loading || !editPrompt.trim()}
+                  onClick={handleEditVideo}
+                  sx={{
+                    borderColor: "#a855f7",
+                    color: "#a855f7",
+                    "&:hover": {
+                      borderColor: "#8b5cf6",
+                      bgcolor: "rgba(139, 92, 246, 0.1)",
+                    },
+                  }}
+                >
+                  {isEditing ? "Editing Video..." : "Apply Changes"}
+                </Button>
+              </Box>
               {/* Downloading Patience Message */}
               {downloading && (
                 <Typography

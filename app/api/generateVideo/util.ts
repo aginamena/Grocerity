@@ -1,7 +1,8 @@
-import { GoogleGenAI, Type } from "@google/genai";
-import { generateCode, generateScript } from "./promts";
 import { supabase } from "@/lib/supabase";
-import {Opik} from "opik";
+import { GoogleGenAI, Type } from "@google/genai";
+import { Opik } from "opik";
+import { Design, DesignWithUrls } from "../Types";
+import { generateCode, generateScript } from "./promts";
 
 const genai = new GoogleGenAI({});
 const client = new Opik()
@@ -108,14 +109,40 @@ export async function enhanceAndUploadImages(design: Design, files: File[]): Pro
         ],
         config: {
           systemInstruction: `
-Role: World-Class Creative Director & Retail Psychologist.
-Task: Engineering "The Buy Trigger" – transform input into a 9:16 masterpiece that stops the scroll and empties the shelves.
-Directives:
-1. Cinematic Brilliance: Use "God-tier" lighting (pristine, high-key, luminous). Every pixel must be razor-sharp. Enhance colors to be hyper-vibrant but premium.
-2. Psychological Persuasion: Use high-impact text overlays, callouts, or diagrams ONLY if they make the product's benefit undeniably clear and desirable. The visuals should feel like a multi-million dollar ad campaign.
-3. Sensory Appeal: Make textures feel touchable (e.g., condensation on a bottle, soft fabric, crisp electronics). The product must look like the most desirable version of itself in existence.
-Output: Return ONLY the final high-fidelity 9:16 visual.
-Note: Do not clutter the screen with text or diagrams. A few words is better
+* Role: World-Class Creative Director & Retail Psychologist
+
+* Task: Engineer “The Buy Trigger.” Transform the provided image into a high-fidelity 9:16 masterpiece that stops the scroll and empties shelves.
+
+* DIRECTIVES:
+
+* 1. Cinematic Brilliance
+* Use God-tier lighting (pristine, high-key, luminous)
+* Razor-sharp detail, ultra-clear pixels
+* Hyper-vibrant yet premium color grading
+* Must feel like a multi-million dollar ad campaign
+
+* 2. Psychological Persuasion
+* Minimal, high-impact text ONLY if it makes the benefit undeniable
+* No clutter — a few powerful words maximum
+* Composition must feel premium and conversion-optimized
+
+* 3. Sensory Appeal
+* Textures must feel touchable (cold condensation, soft fabric, juicy food, sleek electronics)
+* The product must look like the most desirable version of itself in existence
+
+* 4. Subject Integrity (Critical)
+* Do NOT change or replace the main subject(s)
+* Main subject(s) must remain clearly recognizable from the original image
+
+* 5. Scroll-Stopping Impact
+* Jaw-dropping within 0.5 seconds
+* Attention-grabbing and emotionally urgent
+* Viewer should feel: “I need this. I’m going to the store now.”
+
+* OUTPUT:
+* High-fidelity 9:16 vertical visual only
+* Return ONLY the final enhanced image
+
 `,
           responseModalities: ['IMAGE'],
           imageConfig: { aspectRatio: "9:16" }
@@ -268,7 +295,7 @@ export async function generateDesign(prompt: string, files: File[]) {
 }
 
 
-async function convertVoiceoverToPublicUrl(script: string, voiceName: string = 'Kore'): Promise<{url: string, cost: number}> {
+export async function convertVoiceoverToPublicUrl(script: string, voiceName: string = 'Kore'): Promise<{url: string, cost: number}> {
   try {
     const response = await genai.models.generateContent({
       model: 'gemini-2.5-flash-preview-tts',
@@ -370,37 +397,4 @@ function pcmToWav(pcmBuffer: Buffer, sampleRate = 24000) {
   wavHeader.writeUInt32LE(pcmBuffer.length, 40);
 
   return Buffer.concat([wavHeader, pcmBuffer])
-}
-
-
-// Define the structured design interface
-interface Design {
-  concept: {
-    title: string;
-    vibe: string;
-    duration: number;
-    imageCount: number;
-  };
-  voiceover: string;
-  segments: Array<{
-    imageId: string;
-    voSegment: string;
-    duration: number;
-    animation: string;
-  }>;
-  timingSummary: {
-    durations: number[];
-    totalDuration: number;
-  };
-}
-
-interface DesignWithUrls extends Design {
-  voiceoverUrl: string;
-  segments: Array<{
-    imageId: string;
-    voSegment: string;
-    duration: number;
-    animation: string;
-    imageUrl: string;
-  }>;
 }
