@@ -18,8 +18,6 @@ export async function GET(req: Request) {
     for (const task of tasks) {
       const formData = new FormData();
       formData.append("prompt", task.prompt);
-      // formData.append("email", task.email);
-      // formData.append("day", task.day_of_week);
 
       // Download each image and append as a file
       for (const url of task.image_urls) {

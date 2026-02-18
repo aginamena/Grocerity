@@ -24,6 +24,7 @@ import {
   AddPhotoAlternate as AddPhotoIcon,
   Description as DescriptionIcon,
   Email as EmailIcon,
+  InfoOutlined as InfoIcon,
 } from "@mui/icons-material";
 
 const DAYS_OF_WEEK = [
@@ -159,6 +160,63 @@ export default function CalendarPage() {
           backdropFilter: "blur(10px)",
         }}
       >
+        {/* How to Use Section */}
+        <Box
+          sx={{
+            mb: 6,
+            p: 3,
+            borderRadius: 3,
+            bgcolor: "rgba(255, 255, 255, 0.03)",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+          }}
+        >
+          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+            <InfoIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              How to Use the Scheduler
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            {[
+              {
+                step: "1",
+                title: "Select Days",
+                text: "Pick up to 4 days for recurring weekly video generation.",
+              },
+              {
+                step: "2",
+                title: "Add Content",
+                text: "Provide a description and up to 10 images for each selected day.",
+              },
+              {
+                step: "3",
+                title: "Confirm",
+                text: "Enter your email and save. We'll handle the weekly generation automatically.",
+              },
+            ].map((item, idx) => (
+              <Grid key={idx} size={{ xs: 12, md: 4 }}>
+                <Box sx={{ display: "flex", gap: 1.5 }}>
+                  <Typography
+                    variant="h5"
+                    color="primary.main"
+                    sx={{ fontWeight: 800, opacity: 0.5, lineHeight: 1 }}
+                  >
+                    {item.step}
+                  </Typography>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                      {item.title}
+                    </Typography>
+                    <Typography variant="body2" sx={{ opacity: 0.7 }}>
+                      {item.text}
+                    </Typography>
+                  </Box>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
         {/* Day Picker */}
         <Box sx={{ mb: 6 }}>
           <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
