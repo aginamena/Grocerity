@@ -175,7 +175,8 @@ export async function enhanceAndUploadImages(design: Design, files: File[]): Pro
     name: "enhanceAndUploadImages",
   output: {response:cleanedUrls},
     metadata:{
-      model: "gemini-3-pro-image-preview",
+      model:"gemini-2.5-flash-image",
+      //  "gemini-3-pro-image-preview",
         tokens: {
           inputTokens: result?.usageMetadata?.promptTokenCount,
           outputTokens: result?.usageMetadata?.candidatesTokenCount,

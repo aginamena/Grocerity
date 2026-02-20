@@ -13,29 +13,52 @@ export async function GET(req: Request) {
       .eq("day_of_week", currentDay);
 
     if (error) throw error;
+    if (!tasks || tasks.length === 0) return NextResponse.json({ processed: 0 });
 
-    // 2. Process each task (In a real app, you might use a queue or background worker)
-    for (const task of tasks) {
-      const formData = new FormData();
-      formData.append("prompt", task.prompt);
-
-      // Download each image and append as a file
-      for (const url of task.image_urls) {
+    // 2. Process all tasks in parallel
+    await Promise.all(
+      tasks.map(async (task) => {
         try {
-          const response = await fetch(url);
-          const blob = await response.blob();
-          const filename = url.split("/").pop() || "image.jpg";
-          formData.append("images", blob, filename);
-        } catch (downloadError) {
-          console.error(`Failed to download image: ${url}`, downloadError);
-        }
-      }
+          const formData = new FormData();
+          formData.append("prompt", task.prompt);
 
-      await fetch(`${process.env.BASE_URL}/api/generateVideo`, {
-        method: "POST",
-        body: formData,
-      });
-    }
+          // Download each image in parallel for this specific task
+          const imageResults = await Promise.all(
+            task.image_urls.map(async (url: string) => {
+              try {
+                const res = await fetch(url);
+                const blob = await res.blob();
+                const filename = url.split("/").pop() || "image.jpg";
+                return { blob, filename };
+              } catch (err) {
+                console.error(`Failed image download: ${url}`, err);
+                return null;
+              }
+            })
+          );
+
+          // Append successfully downloaded images
+          imageResults.forEach((img) => {
+            if (img) {
+              formData.append("images", img.blob, img.filename);
+            }
+          });
+
+          // Trigger the generation API
+          const response = await fetch(`${process.env.BASE_URL}/api/generateVideo`, {
+            method: "POST",
+            body: formData,
+          });
+
+          if (!response.ok) {
+            throw new Error(`Generation API returned ${response.status}`);
+          }
+        } catch (taskError) {
+          // Log individual task failure but don't stop the whole process
+          console.error(`Error processing task for ${task.email}:`, taskError);
+        }
+      })
+    );
 
     return NextResponse.json({ processed: tasks.length });
   } catch (error: any) {
