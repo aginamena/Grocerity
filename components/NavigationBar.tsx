@@ -11,7 +11,7 @@ export default function NavigationBar() {
               fontWeight: 800,
             }}
           >
-            Grocerity
+            Benaiah
           </Typography>
         </Toolbar>
       </AppBar>

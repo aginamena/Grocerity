@@ -15,12 +15,12 @@ import ScheduleVideos from "@/components/ScheduleVideos";
 import CreateVideo from "@/components/CreateVideo";
 import CreatedVideos from "@/components/CreatedVideos";
 
-const AccountSettings = () => (
-  <Typography sx={{ color: "rgba(255, 255, 255, 0.7)", fontSize: "1.25rem" }}>
-    Update your profile information, notification preferences, and security
-    settings.
-  </Typography>
-);
+// const AccountSettings = () => (
+//   <Typography sx={{ color: "rgba(255, 255, 255, 0.7)", fontSize: "1.25rem" }}>
+//     Update your profile information, notification preferences, and security
+//     settings.
+//   </Typography>
+// );
 
 const MENU_ITEMS = [
   {
@@ -38,11 +38,11 @@ const MENU_ITEMS = [
     label: "Create Video",
     Component: CreateVideo,
   },
-  {
-    id: "settings",
-    label: "Account Settings",
-    Component: AccountSettings,
-  },
+  // {
+  //   id: "settings",
+  //   label: "Account Settings",
+  //   Component: AccountSettings,
+  // },
 ];
 
 export default function DashboardLayout() {
@@ -54,32 +54,36 @@ export default function DashboardLayout() {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        height: "100vh",
+        width: "100vw",
         background:
           "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)",
-        p: { xs: 2, md: 4 },
         display: "flex",
-        justifyContent: "center",
-        alignItems: "flex-start",
+        overflow: "hidden",
       }}
     >
       <Paper
         elevation={10}
         sx={{
           width: "100%",
-          maxWidth: "1440px",
+          height: "100%",
           display: "grid",
           gridTemplateColumns: { xs: "1fr", md: "280px 1fr" },
-          minHeight: "750px",
-          borderRadius: 4,
-          overflow: "hidden",
+          borderRadius: 0,
           background: "rgba(26, 26, 46, 0.8)",
           backdropFilter: "blur(10px)",
-          border: "1px solid rgba(139, 92, 246, 0.2)",
+          border: "none",
         }}
       >
         {/* Left Sidebar Menu */}
-        <Box sx={{ borderRight: "1px solid rgba(139, 92, 246, 0.15)", p: 2 }}>
+        <Box
+          sx={{
+            borderRight: "1px solid rgba(139, 92, 246, 0.15)",
+            p: 3,
+            height: "100%",
+            overflowY: "auto",
+          }}
+        >
           <Typography
             variant="h6"
             sx={{
@@ -124,7 +128,14 @@ export default function DashboardLayout() {
         </Box>
 
         {/* Right Content Area */}
-        <Box sx={{ p: { xs: 2, md: 4 }, overflowY: "auto", maxHeight: "90vh" }}>
+        <Box
+          sx={{
+            p: { xs: 3, md: 6 },
+            overflowY: "auto",
+            height: "100%",
+            bgcolor: "rgba(10, 10, 20, 0.2)",
+          }}
+        >
           <Typography
             variant="h4"
             fontWeight="bold"

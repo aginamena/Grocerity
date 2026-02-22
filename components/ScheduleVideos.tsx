@@ -141,7 +141,7 @@ export default function ScheduleVideos() {
   };
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "100%", maxWidth: 800, mx: "auto" }}>
       <Box
         sx={{
           mb: 4,
