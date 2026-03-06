@@ -97,48 +97,48 @@ export default function ScheduleVideos() {
     }));
   };
 
-  const handleSubmit = async () => {
-    if (selectedDays.length === 0)
-      return alert("Please select at least one day");
-    if (!email || !/^\S+@\S+\.\S+$/.test(email))
-      return alert("Please enter a valid email address");
+  // const handleSubmit = async () => {
+  //   if (selectedDays.length === 0)
+  //     return alert("Please select at least one day");
+  //   if (!email || !/^\S+@\S+\.\S+$/.test(email))
+  //     return alert("Please enter a valid email address");
 
-    for (const day of selectedDays) {
-      if (!dayConfigs[day].prompt || dayConfigs[day].images.length === 0) {
-        return alert(
-          `Incomplete data for ${day}. Need description and images.`,
-        );
-      }
-    }
+  //   for (const day of selectedDays) {
+  //     if (!dayConfigs[day].prompt || dayConfigs[day].images.length === 0) {
+  //       return alert(
+  //         `Incomplete data for ${day}. Need description and images.`,
+  //       );
+  //     }
+  //   }
 
-    setIsProcessing(true);
-    try {
-      // We now pack all data into a single request to be saved for the cron job
-      const formData = new FormData();
-      formData.append("email", email);
+  //   setIsProcessing(true);
+  //   try {
+  //     // We now pack all data into a single request to be saved for the cron job
+  //     const formData = new FormData();
+  //     formData.append("email", email);
 
-      selectedDays.forEach((day) => {
-        const config = dayConfigs[day];
-        formData.append("days", day);
-        formData.append(`prompt_${day}`, config.prompt);
-        config.images.forEach((img) => formData.append(`images_${day}`, img));
-      });
+  //     selectedDays.forEach((day) => {
+  //       const config = dayConfigs[day];
+  //       formData.append("days", day);
+  //       formData.append(`prompt_${day}`, config.prompt);
+  //       config.images.forEach((img) => formData.append(`images_${day}`, img));
+  //     });
 
-      const response = await fetch("/api/schedule", {
-        method: "POST",
-        body: formData,
-      });
+  //     const response = await fetch("/api/schedule", {
+  //       method: "POST",
+  //       body: formData,
+  //     });
 
-      if (!response.ok) throw new Error("Failed to save schedule");
+  //     if (!response.ok) throw new Error("Failed to save schedule");
 
-      alert(`Schedule saved!`);
-    } catch (error) {
-      console.error("Scheduler Error:", error);
-      alert("Failed to save schedule. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
-  };
+  //     alert(`Schedule saved!`);
+  //   } catch (error) {
+  //     console.error("Scheduler Error:", error);
+  //     alert("Failed to save schedule. Please try again.");
+  //   } finally {
+  //     setIsProcessing(false);
+  //   }
+  // };
 
   return (
     <Box sx={{ width: "100%", maxWidth: 800, mx: "auto" }}>
