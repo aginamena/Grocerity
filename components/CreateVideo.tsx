@@ -93,6 +93,92 @@ export default function CreateVideo() {
     });
   };
 
+  const designD = {
+    concept: {
+      title: "Unique Boutique Glam Drop",
+      vibe: "High-Energy, Glamorous, FOMO-inducing",
+      duration: 1560,
+      imageCount: 7,
+    },
+    voiceover:
+      "Stop scrolling! Guess what just dropped at Unique Boutique? The most jaw-dropping new arrivals are HERE! Seriously, get ready to turn heads! We're talking stunning gowns, shimmering with pure magic, for your next big moment! Picture this incredible sequin masterpiece! And oh my gosh, the accessories! Dazzling shoes, chic bags, and sparkle galore to perfect your look! Every piece is a treasure, waiting to make you feel absolutely incredible. You deserve this! Don't miss out! Run, don't walk, to Unique Boutique! Find us at 1020 St Laurent Boulevard, Ottawa, or call 343-540-3930. Your dream outfit is calling!",
+    segments: [
+      {
+        imageId: "image_0.jpeg",
+        voSegment:
+          "Stop scrolling! Guess what just dropped at Unique Boutique? The most jaw-dropping new arrivals are HERE!",
+        duration: 240,
+        animation: "None",
+        imageUrl:
+          "https://ezcqktogrozvauluqgak.supabase.co/storage/v1/object/public/images/cleaned/1771894432957-0.jpeg",
+      },
+      {
+        imageId: "image_2.jpeg",
+        voSegment:
+          "Seriously, get ready to turn heads! We're talking stunning gowns, shimmering with pure magic, for your next big moment!",
+        duration: 312,
+        animation: "Fade",
+        imageUrl:
+          "https://ezcqktogrozvauluqgak.supabase.co/storage/v1/object/public/images/cleaned/1771894452590-1.jpeg",
+      },
+      {
+        imageId: "image_4.jpeg",
+        voSegment: "Picture this incredible sequin masterpiece!",
+        duration: 72,
+        animation: "WipeRight",
+        imageUrl:
+          "https://ezcqktogrozvauluqgak.supabase.co/storage/v1/object/public/images/cleaned/1771894468659-2.jpeg",
+      },
+      {
+        imageId: "image_1.jpeg",
+        voSegment: "And oh my gosh, the accessories! Dazzling shoes...",
+        duration: 108,
+        animation: "IrisOpen",
+        imageUrl:
+          "https://ezcqktogrozvauluqgak.supabase.co/storage/v1/object/public/images/cleaned/1771894489446-3.jpeg",
+      },
+      {
+        imageId: "image_8.jpeg",
+        voSegment: "...chic bags...",
+        duration: 36,
+        animation: "SlideDown",
+        imageUrl:
+          "https://ezcqktogrozvauluqgak.supabase.co/storage/v1/object/public/images/cleaned/1771894506991-4.jpeg",
+      },
+      {
+        imageId: "image_6.jpeg",
+        voSegment: "...and sparkle galore to perfect your look!",
+        duration: 108,
+        animation: "ClockWipe",
+        imageUrl:
+          "https://ezcqktogrozvauluqgak.supabase.co/storage/v1/object/public/images/cleaned/1771894527791-5.jpeg",
+      },
+      {
+        imageId: "image_7.jpeg",
+        voSegment:
+          "Every piece is a treasure, waiting to make you feel absolutely incredible. You deserve this!",
+        duration: 240,
+        animation: "ZoomIn",
+        imageUrl:
+          "https://ezcqktogrozvauluqgak.supabase.co/storage/v1/object/public/images/cleaned/1771894545589-6.jpeg",
+      },
+      {
+        imageId: "image_0.jpeg",
+        voSegment:
+          "Don't miss out! Run, don't walk, to Unique Boutique! Find us at 1020 St Laurent Boulevard, Ottawa, or call 343-540-3930. Your dream outfit is calling!",
+        duration: 444,
+        animation: "Fade",
+        imageUrl:
+          "https://ezcqktogrozvauluqgak.supabase.co/storage/v1/object/public/images/cleaned/1771894565118-7.jpeg",
+      },
+    ],
+    timingSummary: {
+      durations: [240, 312, 72, 108, 36, 108, 240, 444],
+      totalDuration: 1560,
+    },
+    voiceoverUrl:
+      "https://ezcqktogrozvauluqgak.supabase.co/storage/v1/object/public/audios/voiceovers/add54259-9213-4269-9721-595edaec8c7f.wav",
+  };
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (selectedImages.length + files.length > 10) {
@@ -165,7 +251,8 @@ export default function CreateVideo() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          design: currentDesign,
+          design: designD,
+          // : currentDesign,
           editPrompt: editPrompt,
         }),
       });
