@@ -374,7 +374,7 @@ export default function ScheduleVideos() {
         <Button
           fullWidth
           variant="contained"
-          onClick={handleSubmit}
+          // onClick={handleSubmit}
           disabled={isProcessing}
           sx={{
             mt: 2,
