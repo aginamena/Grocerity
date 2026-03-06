@@ -1,0 +1,39 @@
+services:
+  # 1. The WhatsApp API Service
+  - type: web
+    name: whatsapp-api-service
+    env: docker
+    plan: starter # Persistence requires at least Starter plan
+    region: oregon
+    dockerContext: .
+    dockerfilePath: ./whatsapp.Dockerfile # You'll need this file
+    envVars:
+      - key: SECRET_KEY
+        value: 37d0983c9a344bb0bdf5c9dafc916cfa
+      - key: VIEW_QRCODE_TERMINAL
+        value: "false"
+    disk:
+      name: whatsapp-sessions
+      mountPath: /home/node/app/userData
+      sizeGB: 1
+
+  # 2. The Next.js Frontend
+  - type: web
+    name: private-tutor-frontend
+    env: node
+    plan: free
+    region: oregon
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false # Set this in Render Dashboard
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false # Set this in Render Dashboard
+      - key: NEXT_PUBLIC_WHATSAPP_API_URL
+        fromService:
+          type: web
+          name: whatsapp-api-service
+          property: host
+      - key: NEXT_PUBLIC_WHATSAPP_API_KEY
+        value: 37d0983c9a344bb0bdf5c9dafc916cfa
