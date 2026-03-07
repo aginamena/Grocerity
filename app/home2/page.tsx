@@ -2,21 +2,21 @@
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import RefreshIcon from "@mui/icons-material/Refresh";
 import {
+  Avatar,
   Box,
   Button,
   Card,
   CardMedia,
-  Checkbox,
   CircularProgress,
-  FormControlLabel,
+  Divider,
   IconButton,
   Paper,
   Stack,
   TextField,
   Tooltip,
   Typography,
-  Divider,
 } from "@mui/material";
 import { ChangeEvent, useState } from "react";
 
@@ -35,8 +35,10 @@ export default function Home2() {
   const [generalText, setGeneralText] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [postTime, setPostTime] = useState("09:00");
-  const [pairingCode, setPairingCode] = useState<string | null>(null);
   const [sessionStatus, setSessionStatus] = useState<string | null>(null);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [timer, setTimer] = useState<number>(0);
+  const [session, setSession] = useState<any>("");
 
   // Loading States
   const [isSyncing, setIsSyncing] = useState(false);
@@ -54,96 +56,89 @@ export default function Home2() {
     "Saturday",
   ];
   const apikey = "b5d2364e1bcb47268dd820aa076c333f";
+  const WAHA_URL = "https://34.75.49.98";
 
   async function handleConnect() {
-    const input = prompt(
-      "Please enter your WhatsApp phone number with country code (e.g., 13439972096):",
-    );
-
-    // 2. Validate input is not null and contains only digits
-    if (input === null) return; // User cancelled
-
-    const phoneNumber = input.replace(/\D/g, "");
-    if (phoneNumber.length < 10) {
-      alert(
-        "Invalid phone number. Please include your country code and at least 10 digits.",
-      );
-      return;
-    }
-    const sessionName = Date.now().toString(); // Unique session name based on timestamp
+    const sessionName = `qr_${Date.now()}`;
+    setSession(sessionName);
     setIsConnecting(true);
-    setPairingCode(null);
-    setSessionStatus("Initializing...");
+    setQrCode(null);
+    setSessionStatus("Initializing Session...");
+    setTimer(0);
+
+    let localTimer = 0;
+    let qrCount = 0;
 
     try {
       // 1. Create & Start Session
-      await fetch("http://localhost:3000/api/sessions", {
+      await fetch(`${WAHA_URL}/api/sessions`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Api-Key": apikey,
-        },
+        headers: { "Content-Type": "application/json", "X-Api-Key": apikey },
         body: JSON.stringify({ name: sessionName }),
       });
 
-      await fetch(`http://localhost:3000/api/sessions/${sessionName}/start`, {
+      await fetch(`${WAHA_URL}/api/sessions/${sessionName}/start`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Api-Key": apikey,
-        },
+        headers: { "X-Api-Key": apikey },
       });
 
-      // 2. Poll for Status
       const pollInterval = setInterval(async () => {
+        // 1. Update Countdown
+        if (localTimer > 0) {
+          localTimer -= 2;
+          setTimer(localTimer);
+        }
+
         try {
-          const res = await fetch(
-            `http://localhost:3000/api/sessions/${sessionName}`,
-            {
-              headers: { "X-Api-Key": apikey },
-            },
-          );
+          const res = await fetch(`${WAHA_URL}/api/sessions/${sessionName}`, {
+            headers: { "X-Api-Key": apikey },
+          });
           const data = await res.json();
           const currentStatus = data.status.toUpperCase();
-          console.log("Current Session Status:", currentStatus);
-          // Update general status
+
           if (currentStatus === "WORKING") {
             clearInterval(pollInterval);
             setIsConnected(true);
-            setPairingCode(null);
+            setQrCode(null);
+            setTimer(0);
             setSessionStatus("CONNECTED ✅");
             setIsConnecting(false);
-          } else if (currentStatus === "SCAN_QR_CODE" && !pairingCode) {
-            console.log("requs-cod");
-            const codeReq = await fetch(
-              `http://localhost:3000/api/${sessionName}/auth/request-code`,
-              {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "X-Api-Key": apikey,
+          } else if (currentStatus === "SCAN_QR_CODE") {
+            // 2. Fetch logic: If timer hit 0 and we haven't reached the limit (max 6-7 codes for ~3 mins)
+            if (localTimer <= 0 && qrCount < 7) {
+              qrCount++;
+              console.log(`Fetching QR #${qrCount}`);
+              const qrRes = await fetch(
+                `${WAHA_URL}/api/${sessionName}/auth/qr`,
+                {
+                  headers: { Accept: "application/json", "X-Api-Key": apikey },
                 },
-                body: JSON.stringify({ phoneNumber }),
-              },
-            );
-            const codeData = await codeReq.json();
-            console.log("codeData", codeData);
-            if (codeData.code) {
-              setPairingCode(codeData.code);
-              setSessionStatus(null); // Hide the "SCAN QR CODE" text once code is ready
-              setIsConnecting(false);
+              );
+              const qrData = await qrRes.json();
+
+              if (qrData.data) {
+                setQrCode(
+                  `data:${qrData.mimetype || "image/png"};base64,${qrData.data}`,
+                );
+                // 60s for the first code, 20s for subsequent ones
+                localTimer = qrCount === 1 ? 60 : 20;
+                setTimer(localTimer);
+                setIsConnecting(false);
+              }
             }
-          } else if (!pairingCode) {
-            setSessionStatus(currentStatus.replace(/_/g, " "));
+          } else if (currentStatus === "FAILED") {
+            clearInterval(pollInterval);
+            setSessionStatus("FAILED");
+            setIsConnecting(false);
           }
         } catch (e) {
-          console.error("Polling error:", e);
+          console.error("QR Polling error:", e);
         }
       }, 1000);
     } catch (error) {
       console.error(error);
       setIsConnecting(false);
-      setSessionStatus("FAILED");
+      setSessionStatus("FAILED TO START");
     }
   }
 
@@ -151,7 +146,7 @@ export default function Home2() {
     setIsSyncing(true);
     try {
       const request = await fetch(
-        "http://localhost:3000/api/gg/groups?limit=20",
+        `https://34.75.49.98/api/${session}/groups?limit=20`,
         {
           method: "GET",
           headers: {
@@ -372,9 +367,8 @@ export default function Home2() {
                       "CONNECT ACCOUNT"
                     )}
                   </Button>
-
-                  {/* Replacement logic: Status text is hidden if pairingCode exists */}
-                  {sessionStatus && !pairingCode && (
+                  {/* Session Status Display */}
+                  {sessionStatus && !qrCode && (
                     <Typography
                       variant="overline"
                       sx={{ fontWeight: "bold", color: "#8b5cf6" }}
@@ -382,9 +376,128 @@ export default function Home2() {
                       STATUS: {sessionStatus}
                     </Typography>
                   )}
+                  {qrCode && (
+                    <Stack
+                      spacing={2}
+                      alignItems="center"
+                      sx={{ mt: 2, width: "100%", maxWidth: 300 }}
+                    >
+                      <Box sx={{ textAlign: "center", mb: 1 }}>
+                        <Typography
+                          variant="subtitle2"
+                          sx={{ color: "#fff", fontWeight: "bold" }}
+                        >
+                          HOW TO SCAN:
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "rgba(255,255,255,0.7)",
+                            display: "block",
+                          }}
+                        >
+                          1. Open WhatsApp on your phone
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "rgba(255,255,255,0.7)",
+                            display: "block",
+                          }}
+                        >
+                          2. Tap Menu or Settings &gt; Linked Devices
+                        </Typography>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: "rgba(255,255,255,0.7)",
+                            display: "block",
+                          }}
+                        >
+                          3. Tap on Link a Device & scan the code
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ position: "relative" }}>
+                        <Paper
+                          elevation={10}
+                          sx={{
+                            p: 2,
+                            bgcolor: "#fff",
+                            borderRadius: 4,
+                            border: "4px solid #8b5cf6",
+                            transition: "all 0.3s ease",
+                            filter:
+                              timer === 0 ? "blur(4px) grayscale(1)" : "none",
+                          }}
+                        >
+                          <Box
+                            component="img"
+                            src={qrCode}
+                            alt="WhatsApp QR Code"
+                            sx={{ width: 220, height: 220 }}
+                          />
+                        </Paper>
+                        <Avatar
+                          sx={{
+                            position: "absolute",
+                            top: -15,
+                            right: -15,
+                            bgcolor: timer < 10 ? "#ef4444" : "#8b5cf6",
+                            width: 45,
+                            height: 45,
+                            fontSize: "0.9rem",
+                            fontWeight: "bold",
+                            border: "3px solid #1a1a1a",
+                            boxShadow: "0 0 15px rgba(139, 92, 246, 0.5)",
+                          }}
+                        >
+                          {timer}s
+                        </Avatar>
+                      </Box>
+                      <Typography
+                        variant="caption"
+                        sx={{ color: "#8b5cf6", fontWeight: "bold" }}
+                      >
+                        EXPIRES IN {timer}s - SCAN NOW
+                      </Typography>
+                      {!isConnected && timer === 0 && (
+                        <Button
+                          size="small"
+                          onClick={() => {
+                            setTimer(0);
+                            handleConnect();
+                          }}
+                          startIcon={<RefreshIcon />}
+                          variant="outlined"
+                          sx={{
+                            color: "#ef4444",
+                            borderColor: "#ef4444",
+                            textTransform: "none",
+                            fontWeight: "bold",
+                            "&:hover": {
+                              bgcolor: "rgba(239, 68, 68, 0.1)",
+                              borderColor: "#ef4444",
+                            },
+                          }}
+                        >
+                          EXPIRED - REGENERATE CODE
+                        </Button>
+                      )}
+                    </Stack>
+                  )}
+                  {/* Replacement logic: Status text is hidden if pairingCode exists */}
+                  {/* {sessionStatus && !pairingCode && (
+                    <Typography
+                      variant="overline"
+                      sx={{ fontWeight: "bold", color: "#8b5cf6" }}
+                    >
+                      STATUS: {sessionStatus}
+                    </Typography>
+                  )} */}
 
                   {/* Prominent Replacement Code */}
-                  {pairingCode && (
+                  {/* {pairingCode && (
                     <Box
                       sx={{
                         px: 2,
@@ -415,10 +528,10 @@ export default function Home2() {
                         {pairingCode}
                       </Typography>
                     </Box>
-                  )}
+                  )} */}
                 </Box>
 
-                {pairingCode && (
+                {/* {pairingCode && (
                   <Typography
                     variant="caption"
                     sx={{
@@ -433,7 +546,7 @@ export default function Home2() {
                     Linked Devices &gt; Link a Device &gt;{" "}
                     <b>Link with phone number instead</b>. Enter the code above.
                   </Typography>
-                )}
+                )} */}
 
                 <Divider
                   sx={{ borderColor: "rgba(255,255,255,0.05)", my: 1 }}
@@ -462,6 +575,54 @@ export default function Home2() {
                     <InfoOutlinedIcon sx={{ opacity: 0.4 }} fontSize="small" />
                   </Tooltip>
                 </Box>
+                {/* Groups Display Section */}
+                {groups.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        color: "rgba(255,255,255,0.5)",
+                        display: "block",
+                        mb: 1,
+                      }}
+                    >
+                      SELECT DESTINATION GROUPS:
+                    </Typography>
+                    <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                      {groups.map((group) => {
+                        const isSelected = selectedGroups.find(
+                          (g) => g.id === group.id,
+                        );
+                        return (
+                          <Button
+                            key={group.id}
+                            variant={isSelected ? "contained" : "outlined"}
+                            onClick={() => handleToggleGroup(group)}
+                            sx={{
+                              borderRadius: 2,
+                              textTransform: "none",
+                              fontSize: "0.75rem",
+                              bgcolor: isSelected
+                                ? "#8b5cf6"
+                                : "rgba(255,255,255,0.05)",
+                              color: "#fff",
+                              borderColor: isSelected
+                                ? "#8b5cf6"
+                                : "rgba(139, 92, 246, 0.3)",
+                              "&:hover": {
+                                bgcolor: isSelected
+                                  ? "#7c3aed"
+                                  : "rgba(139, 92, 246, 0.1)",
+                              },
+                            }}
+                          >
+                            {group.name}
+                          </Button>
+                        );
+                      })}
+                    </Box>
+                  </Box>
+                )}
               </Stack>
             </Box>
           </Box>
