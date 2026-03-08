@@ -4,9 +4,8 @@ import ThemeRegistry from "@/components/ThemeRegistry";
 import NavigationBar from "@/components/NavigationBar";
 
 export const metadata: Metadata = {
-  title: "Grocerity",
-  description:
-    "Create short videos to promote your grocery products on social media",
+  title: "Benaiah",
+  description: "Automate your posting on whatsapp groups with Benaiah",
 };
 
 export default function RootLayout({
