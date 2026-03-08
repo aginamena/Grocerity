@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { selectedGroups, images, generalText, selectedDays, postTime } = body;
+    const { session, selectedGroups, images, generalText, selectedDays, postTime } = body;
 
     const uploadedImages = [];
 
@@ -36,6 +36,7 @@ export async function POST(request: Request) {
     // 3. Insert into DB with Public URLs instead of Base64
     const { data, error } = await supabase.from("scheduled_posts").insert([
       {
+        session,
         selected_groups: selectedGroups,
         images: uploadedImages, // Array of {url, caption}
         general_text: generalText,

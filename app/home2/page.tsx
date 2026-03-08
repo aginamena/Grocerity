@@ -1,4 +1,5 @@
 "use client";
+
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
@@ -34,7 +35,6 @@ export default function Home2() {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [generalText, setGeneralText] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
-  const [postTime, setPostTime] = useState("09:00");
   const [sessionStatus, setSessionStatus] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [timer, setTimer] = useState<number>(0);
@@ -107,7 +107,6 @@ export default function Home2() {
             // 2. Fetch logic: If timer hit 0 and we haven't reached the limit (max 6-7 codes for ~3 mins)
             if (localTimer <= 0 && qrCount < 7) {
               qrCount++;
-              console.log(`Fetching QR #${qrCount}`);
               const qrRes = await fetch(
                 `${WAHA_URL}/api/${sessionName}/auth/qr`,
                 {
@@ -214,13 +213,12 @@ export default function Home2() {
   };
 
   async function saveToSupabase() {
-    // Check for Groups
     if (selectedGroups.length === 0) {
       return alert("Please select at least one group.");
     }
 
     // Check for Content (Text or Images)
-    const hasText = generalText.trim().length > 0;
+    const hasText = generalText.length > 0;
     const hasImages = images.length > 0;
 
     if (!hasText && !hasImages) {
@@ -241,11 +239,12 @@ export default function Home2() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          session,
           selectedGroups,
           images,
-          generalText,
+          generalText: generalText.trim(),
           selectedDays,
-          postTime,
+          postTime: "09:00", // Hardcoded for now, can be made dynamic later
         }),
       });
 
@@ -295,7 +294,7 @@ export default function Home2() {
         minHeight: "100vh",
         background:
           "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)",
-        p: { xs: 1.5, sm: 3, md: 6 }, // Reduced padding on mobile
+        p: { xs: 1.5, sm: 3, md: 6 },
         color: "#fff",
         display: "flex",
         justifyContent: "center",
@@ -309,8 +308,8 @@ export default function Home2() {
           background: "rgba(26, 26, 46, 0.4)",
           backdropFilter: "blur(20px)",
           border: "1px solid rgba(139, 92, 246, 0.2)",
-          borderRadius: { xs: 4, md: 6 }, // Softer corners on desktop
-          p: { xs: 2.5, sm: 4, md: 5 }, // Adaptive internal padding
+          borderRadius: { xs: 4, md: 6 },
+          p: { xs: 2.5, sm: 4, md: 5 },
         }}
       >
         <Stack spacing={1} sx={{ mb: { xs: 3, md: 4 } }}>
@@ -486,67 +485,7 @@ export default function Home2() {
                       )}
                     </Stack>
                   )}
-                  {/* Replacement logic: Status text is hidden if pairingCode exists */}
-                  {/* {sessionStatus && !pairingCode && (
-                    <Typography
-                      variant="overline"
-                      sx={{ fontWeight: "bold", color: "#8b5cf6" }}
-                    >
-                      STATUS: {sessionStatus}
-                    </Typography>
-                  )} */}
-
-                  {/* Prominent Replacement Code */}
-                  {/* {pairingCode && (
-                    <Box
-                      sx={{
-                        px: 2,
-                        py: 1,
-                        bgcolor: "#000",
-                        borderRadius: 2,
-                        border: "2px solid #8b5cf6",
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 2,
-                      }}
-                    >
-                      <Typography
-                        variant="caption"
-                        sx={{ color: "#8b5cf6", fontWeight: "bold" }}
-                      >
-                        CODE:
-                      </Typography>
-                      <Typography
-                        variant="h5"
-                        sx={{
-                          fontWeight: 900,
-                          letterSpacing: 4,
-                          color: "#fff",
-                          fontFamily: "monospace",
-                        }}
-                      >
-                        {pairingCode}
-                      </Typography>
-                    </Box>
-                  )} */}
                 </Box>
-
-                {/* {pairingCode && (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      color: "rgba(255,255,255,0.6)",
-                      bgcolor: "rgba(0,0,0,0.2)",
-                      p: 1.5,
-                      borderRadius: 1,
-                      border: "1px solid rgba(139,92,246,0.2)",
-                    }}
-                  >
-                    <b>How to connect:</b> Open WhatsApp &gt; Settings &gt;
-                    Linked Devices &gt; Link a Device &gt;{" "}
-                    <b>Link with phone number instead</b>. Enter the code above.
-                  </Typography>
-                )} */}
 
                 <Divider
                   sx={{ borderColor: "rgba(255,255,255,0.05)", my: 1 }}
@@ -774,18 +713,26 @@ export default function Home2() {
                 ))}
               </Box>
 
-              <TextField
-                type="time"
-                fullWidth={false}
-                value={postTime}
-                onChange={(e) => setPostTime(e.target.value)}
-                sx={{
-                  width: { xs: "100%", sm: 200 },
-                  mb: 4,
-                  bgcolor: "rgba(0,0,0,0.2)",
-                  "& input": { color: "#fff" },
-                }}
-              />
+              <Box
+                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 4 }}
+              >
+                <TextField
+                  type="time"
+                  fullWidth={false}
+                  value="09:00"
+                  sx={{
+                    width: { xs: "100%", sm: 200 },
+                    bgcolor: "rgba(0,0,0,0.2)",
+                    "& input": { color: "#fff" },
+                  }}
+                />
+                <Tooltip
+                  title="Post will be posted at 9am EST using your selected days"
+                  arrow
+                >
+                  <InfoOutlinedIcon sx={{ color: "#8b5cf6", cursor: "help" }} />
+                </Tooltip>
+              </Box>
 
               <Button
                 fullWidth
