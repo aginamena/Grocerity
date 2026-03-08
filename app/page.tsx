@@ -460,7 +460,7 @@ export default function Home2() {
                       >
                         EXPIRES IN {timer}s - SCAN NOW
                       </Typography>
-                      {!isConnected && timer === 0 && (
+                      {/* {!isConnected && timer === 0 && (
                         <Button
                           size="small"
                           onClick={() => {
@@ -482,7 +482,7 @@ export default function Home2() {
                         >
                           EXPIRED - REGENERATE CODE
                         </Button>
-                      )}
+                      )} */}
                     </Stack>
                   )}
                 </Box>
