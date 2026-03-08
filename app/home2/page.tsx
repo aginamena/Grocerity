@@ -55,8 +55,6 @@ export default function Home2() {
     "Friday",
     "Saturday",
   ];
-  const apikey = "b5d2364e1bcb47268dd820aa076c333f";
-  const WAHA_URL = "https://34.75.49.98";
 
   async function handleConnect() {
     const sessionName = `qr_${Date.now()}`;
@@ -71,15 +69,14 @@ export default function Home2() {
 
     try {
       // 1. Create & Start Session
-      await fetch(`${WAHA_URL}/api/sessions`, {
+      await fetch(`/api/waha?path=sessions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-Api-Key": apikey },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: sessionName }),
       });
 
-      await fetch(`${WAHA_URL}/api/sessions/${sessionName}/start`, {
+      await fetch(`/api/waha?path=sessions/${sessionName}/start`, {
         method: "POST",
-        headers: { "X-Api-Key": apikey },
       });
 
       const pollInterval = setInterval(async () => {
@@ -90,9 +87,7 @@ export default function Home2() {
         }
 
         try {
-          const res = await fetch(`${WAHA_URL}/api/sessions/${sessionName}`, {
-            headers: { "X-Api-Key": apikey },
-          });
+          const res = await fetch(`/api/waha?path=sessions/${sessionName}`);
           const data = await res.json();
           const currentStatus = data.status.toUpperCase();
 
@@ -108,10 +103,7 @@ export default function Home2() {
             if (localTimer <= 0 && qrCount < 7) {
               qrCount++;
               const qrRes = await fetch(
-                `${WAHA_URL}/api/${sessionName}/auth/qr`,
-                {
-                  headers: { Accept: "application/json", "X-Api-Key": apikey },
-                },
+                `/api/waha?path=${sessionName}/auth/qr`,
               );
               const qrData = await qrRes.json();
 
@@ -144,16 +136,7 @@ export default function Home2() {
   async function getAllGroups() {
     setIsSyncing(true);
     try {
-      const request = await fetch(
-        `https://34.75.49.98/api/${session}/groups?limit=20`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Api-Key": apikey,
-          },
-        },
-      );
+      const request = await fetch(`/api/waha?path=${session}/groups&limit=20`);
       const data = await request.json();
       const parsedGroups = data.map((group: any) => ({
         id: group.id._serialized,
@@ -490,7 +473,6 @@ export default function Home2() {
                 <Divider
                   sx={{ borderColor: "rgba(255,255,255,0.05)", my: 1 }}
                 />
-
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <Button
                     onClick={getAllGroups}
