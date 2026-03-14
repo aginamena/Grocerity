@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 const WAHA_URL = "https://api.grocerity.org";
-const WAHA_API_KEY = process.env.WAHA_API_KEY;
+const WAHA_API_KEY = process.env.WAHA_API_KEY ?? "";
 
 export async function GET(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
   const { path } = await params;

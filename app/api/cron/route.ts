@@ -3,7 +3,7 @@ import { supabase } from "@/lib/supabase";
 
 
 const WAHA_URL = "https://api.grocerity.org";
-const API_KEY = process.env.WAHA_API_KEY
+const API_KEY = process.env.WAHA_API_KEY ?? "";
 
 export async function GET(request: Request) {
   try {
