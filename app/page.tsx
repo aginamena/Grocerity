@@ -239,7 +239,7 @@ export default function Home() {
     }
     setIsScheduling(true);
     try {
-      const response = await fetch("/api/scheduledPosts", {
+      const response = await fetch("/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
