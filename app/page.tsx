@@ -1,9 +1,9 @@
 "use client";
 
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import DeleteIcon from "@mui/icons-material/Delete";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import RefreshIcon from "@mui/icons-material/Refresh";
 import {
   Avatar,
   Box,
@@ -27,7 +27,7 @@ interface ImageItem {
   caption: string;
 }
 
-export default function Home2() {
+export default function Home() {
   const [groups, setGroups] = useState<{ id: string; name: string }[]>([]);
   const [selectedGroups, setSelectedGroups] = useState<
     { id: string; name: string }[]
@@ -56,7 +56,7 @@ export default function Home2() {
     "Saturday",
   ];
   async function handleConnect() {
-    const sessionName = `qr_${Date.now()}`;
+    const sessionName = Date.now().toString();
     setSession(sessionName);
     setIsConnecting(true);
     setQrCode(null);
@@ -250,7 +250,6 @@ export default function Home2() {
           images,
           generalText: generalText.trim(),
           selectedDays,
-          postTime: "09:00", // Hardcoded for now, can be made dynamic later
         }),
       });
 
@@ -507,7 +506,7 @@ export default function Home2() {
                         mb: 1,
                       }}
                     >
-                      SELECT DESTINATION GROUPS:
+                      SELECT TOP 20 DESTINATION GROUPS:
                     </Typography>
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                       {groups.map((group) => {
@@ -555,21 +554,6 @@ export default function Home2() {
               instruction="Send text, images, or both combined."
             />
             <Stack spacing={3}>
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                variant="filled"
-                placeholder="Enter message text..."
-                value={generalText}
-                onChange={(e) => setGeneralText(e.target.value)}
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.03)",
-                  borderRadius: 2,
-                  "& .MuiInputBase-root": { color: "#fff" },
-                }}
-              />
-
               <Box>
                 <Button
                   component="label"
@@ -654,6 +638,20 @@ export default function Home2() {
                   ))}
                 </Box>
               </Box>
+              <TextField
+                fullWidth
+                multiline
+                rows={5}
+                variant="filled"
+                placeholder="Enter text message..."
+                value={generalText}
+                onChange={(e) => setGeneralText(e.target.value)}
+                sx={{
+                  bgcolor: "rgba(255,255,255,0.03)",
+                  borderRadius: 2,
+                  "& .MuiInputBase-root": { color: "#fff" },
+                }}
+              />
             </Stack>
           </Box>
 
@@ -695,21 +693,51 @@ export default function Home2() {
                 ))}
               </Box>
 
-              <Box
-                sx={{ display: "flex", alignItems: "center", gap: 1, mb: 4 }}
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "rgba(255,255,255,0.5)",
+                  display: "block",
+                  mb: 1,
+                  fontWeight: "bold",
+                }}
               >
-                <TextField
-                  type="time"
-                  fullWidth={false}
-                  value="09:00"
-                  sx={{
-                    width: { xs: "100%", sm: 200 },
-                    bgcolor: "rgba(0,0,0,0.2)",
-                    "& input": { color: "#fff" },
-                  }}
-                />
+                SCHEDULED TIMES (EST):
+              </Typography>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  alignItems: "center",
+                  gap: 2,
+                  mb: 4,
+                }}
+              >
+                {["08:00 AM", "02:00 PM", "07:00 PM"].map((time) => (
+                  <Box
+                    key={time}
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      bgcolor: "rgba(139, 92, 246, 0.2)",
+                      px: 2,
+                      py: 1,
+                      borderRadius: 2,
+                      border: "1px solid rgba(139, 92, 246, 0.3)",
+                    }}
+                  >
+                    <AccessTimeIcon sx={{ color: "#8b5cf6", fontSize: 20 }} />
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: "bold", color: "#fff" }}
+                    >
+                      {time}
+                    </Typography>
+                  </Box>
+                ))}
                 <Tooltip
-                  title="Post will be posted at 9am EST using your selected days"
+                  title="Your messages will be automatically posted at these three times on your selected days."
                   arrow
                 >
                   <InfoOutlinedIcon sx={{ color: "#8b5cf6", cursor: "help" }} />

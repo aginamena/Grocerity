@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
+import { NextResponse } from "next/server";
 
 
 const WAHA_URL = "https://api.grocerity.org";
-const API_KEY = process.env.WAHA_API_KEY ?? "";
+const WAHA_API_KEY = process.env.WAHA_API_KEY ?? "";
 
 export async function GET(request: Request) {
   try {
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
 
     // 1. Fetch posts scheduled for today
     const { data: posts, error } = await supabase
-      .from("scheduled_posts")
+      .from("posts")
       .select("*")
       .contains("days", [today]);
 
@@ -31,7 +31,7 @@ export async function GET(request: Request) {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                "X-Api-Key": API_KEY,
+                "X-Api-Key": WAHA_API_KEY,
               },
               body: JSON.stringify({
                 chatId: chatId,
@@ -52,7 +52,7 @@ export async function GET(request: Request) {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "X-Api-Key": API_KEY,
+              "X-Api-Key": WAHA_API_KEY,
             },
             body: JSON.stringify({
               chatId: chatId,
@@ -61,6 +61,33 @@ export async function GET(request: Request) {
             }),
           });
         }
+      }
+      // 4. Send a single confirmation to the owner after all groups are processed
+      try {
+        const meRes = await fetch(`${WAHA_URL}/api/sessions/${session}/me`, {
+          headers: { "X-Api-Key": WAHA_API_KEY },
+        });
+        
+        if (meRes.ok) {
+          const meData = await meRes.json();
+          const ownerChatId = meData.id;
+          const groupNames = selected_groups.map((g: any) => g.name).join(", ");
+
+          await fetch(`${WAHA_URL}/api/sendText`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Api-Key": WAHA_API_KEY,
+            },
+            body: JSON.stringify({
+              chatId: ownerChatId, 
+              text: `✅ Your post has been posted in your selected groups: ${groupNames}!`,
+              session: session
+            }),
+          });
+        }
+      } catch (confirmError) {
+        console.error("Failed to send confirmation to owner:", confirmError);
       }
     }
 
