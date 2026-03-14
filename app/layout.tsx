@@ -4,8 +4,8 @@ import ThemeRegistry from "@/components/ThemeRegistry";
 import NavigationBar from "@/components/NavigationBar";
 
 export const metadata: Metadata = {
-  title: "Benaiah",
-  description: "Automate your posting on whatsapp groups with Benaiah",
+  title: "Grocerity",
+  description: "Automate your posting on whatsapp groups with Grocerity",
 };
 
 export default function RootLayout({
