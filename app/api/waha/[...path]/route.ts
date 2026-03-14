@@ -17,6 +17,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ path
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error: any) {
+    console.error("Internal Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
@@ -37,6 +38,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ pat
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error: any) {
+      console.error("Internal Error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
