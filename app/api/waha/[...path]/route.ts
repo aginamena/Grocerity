@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 
-const WAHA_URL = "https://34.75.49.98";
-const WAHA_API_KEY = "b5d2364e1bcb47268dd820aa076c333f";
+const WAHA_URL = "https://api.grocerity.org";
+const WAHA_API_KEY = process.env.WAHA_API_KEY;
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const path = searchParams.get("path");
-  
+export async function GET(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
+  const { path } = await params;
+
   try {
-    const res = await fetch(`${WAHA_URL}/api/${path}`, {
-      headers: { "X-Api-Key": WAHA_API_KEY },
+    const res = await fetch(`${WAHA_URL}/api/${path.join('/')}`, {
+      headers: { 
+        "X-Api-Key": WAHA_API_KEY, 
+         "accept": "application/json",
+       },
     });
+    
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error: any) {
@@ -18,13 +21,12 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const path = searchParams.get("path");
+export async function POST(request: Request, { params }: { params: Promise<{ path: string[] }> }) {
+  const { path } = await params;
   const body = await request.json();
 
   try {
-    const res = await fetch(`${WAHA_URL}/api/${path}`, {
+    const res = await fetch(`${WAHA_URL}/api/${path.join('/')}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

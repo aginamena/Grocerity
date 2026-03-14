@@ -55,9 +55,6 @@ export default function Home2() {
     "Friday",
     "Saturday",
   ];
-  const apikey = "b5d2364e1bcb47268dd820aa076c333f";
-  const WAHA_URL = "https://34.75.49.98";
-
   async function handleConnect() {
     const sessionName = `qr_${Date.now()}`;
     setSession(sessionName);
@@ -66,72 +63,90 @@ export default function Home2() {
     setSessionStatus("Initializing Session...");
     setTimer(0);
 
-    let localTimer = 0;
     let qrCount = 0;
+    let qrExpiresAt = 0;
+    const maxQrCodes = 6;
 
     try {
-      // 1. Create & Start Session
-      await fetch(`${WAHA_URL}/api/sessions`, {
+      // Create session
+      await fetch(`/api/waha/sessions`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "X-Api-Key": apikey },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: sessionName }),
       });
 
-      await fetch(`${WAHA_URL}/api/sessions/${sessionName}/start`, {
+      // Start session
+      await fetch(`/api/waha/sessions/${sessionName}/start`, {
         method: "POST",
-        headers: { "X-Api-Key": apikey },
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
       });
 
       const pollInterval = setInterval(async () => {
-        // 1. Update Countdown
-        if (localTimer > 0) {
-          localTimer -= 2;
-          setTimer(localTimer);
-        }
-
         try {
-          const res = await fetch(`${WAHA_URL}/api/sessions/${sessionName}`, {
-            headers: { "X-Api-Key": apikey },
-          });
-          const data = await res.json();
-          const currentStatus = data.status.toUpperCase();
+          const res = await fetch(`/api/waha/sessions/${sessionName}`);
+          const statusData = await res.json();
+          const status = statusData.status;
 
-          if (currentStatus === "WORKING") {
+          const now = Math.floor(Date.now() / 1000);
+
+          // ✅ SUCCESS
+          if (status === "WORKING") {
             clearInterval(pollInterval);
             setIsConnected(true);
             setQrCode(null);
             setTimer(0);
             setSessionStatus("CONNECTED ✅");
             setIsConnecting(false);
-          } else if (currentStatus === "SCAN_QR_CODE") {
-            // 2. Fetch logic: If timer hit 0 and we haven't reached the limit (max 6-7 codes for ~3 mins)
-            if (localTimer <= 0 && qrCount < 7) {
-              qrCount++;
-              const qrRes = await fetch(
-                `${WAHA_URL}/api/${sessionName}/auth/qr`,
-                {
-                  headers: { Accept: "application/json", "X-Api-Key": apikey },
-                },
-              );
-              const qrData = await qrRes.json();
+            return;
+          }
 
-              if (qrData.data) {
+          // ❌ FAILURE
+          if (status === "FAILED" || status === "STOPPED") {
+            clearInterval(pollInterval);
+            setSessionStatus("FAILED");
+            setQrCode(null);
+            setTimer(0);
+            setIsConnecting(false);
+            return;
+          }
+
+          // 📱 QR SCAN FLOW
+          if (status === "SCAN_QR_CODE") {
+            let remaining = Math.max(0, qrExpiresAt - now);
+            setTimer(remaining);
+            setSessionStatus("Scan QR Code");
+
+            // Generate new QR if expired or first time
+            if (remaining === 0) {
+              if (qrCount >= maxQrCodes) {
+                clearInterval(pollInterval);
+                setSessionStatus("QR LIMIT REACHED");
+                setQrCode(null);
+                setTimer(0);
+                setIsConnecting(false);
+                return;
+              }
+
+              qrCount++;
+
+              const duration = qrCount === 1 ? 60 : 20;
+              qrExpiresAt = now + duration;
+              setTimer(duration);
+
+              const qrRes = await fetch(`/api/waha/${sessionName}/auth/qr`);
+
+              const qrData = await qrRes.json();
+              console.log("QR Data:", qrData);
+              if (qrData?.data) {
                 setQrCode(
                   `data:${qrData.mimetype || "image/png"};base64,${qrData.data}`,
                 );
-                // 60s for the first code, 20s for subsequent ones
-                localTimer = qrCount === 1 ? 60 : 20;
-                setTimer(localTimer);
-                setIsConnecting(false);
               }
             }
-          } else if (currentStatus === "FAILED") {
-            clearInterval(pollInterval);
-            setSessionStatus("FAILED");
-            setIsConnecting(false);
           }
-        } catch (e) {
-          console.error("QR Polling error:", e);
+        } catch (err) {
+          console.error("Polling error:", err);
         }
       }, 1000);
     } catch (error) {
@@ -144,16 +159,7 @@ export default function Home2() {
   async function getAllGroups() {
     setIsSyncing(true);
     try {
-      const request = await fetch(
-        `https://34.75.49.98/api/${session}/groups?limit=20`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "X-Api-Key": apikey,
-          },
-        },
-      );
+      const request = await fetch(`/api/waha/${session}/groups?limit=20`);
       const data = await request.json();
       const parsedGroups = data.map((group: any) => ({
         id: group.id._serialized,
@@ -460,29 +466,6 @@ export default function Home2() {
                       >
                         EXPIRES IN {timer}s - SCAN NOW
                       </Typography>
-                      {/* {!isConnected && timer === 0 && (
-                        <Button
-                          size="small"
-                          onClick={() => {
-                            setTimer(0);
-                            handleConnect();
-                          }}
-                          startIcon={<RefreshIcon />}
-                          variant="outlined"
-                          sx={{
-                            color: "#ef4444",
-                            borderColor: "#ef4444",
-                            textTransform: "none",
-                            fontWeight: "bold",
-                            "&:hover": {
-                              bgcolor: "rgba(239, 68, 68, 0.1)",
-                              borderColor: "#ef4444",
-                            },
-                          }}
-                        >
-                          EXPIRED - REGENERATE CODE
-                        </Button>
-                      )} */}
                     </Stack>
                   )}
                 </Box>
@@ -490,7 +473,6 @@ export default function Home2() {
                 <Divider
                   sx={{ borderColor: "rgba(255,255,255,0.05)", my: 1 }}
                 />
-
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <Button
                     onClick={getAllGroups}

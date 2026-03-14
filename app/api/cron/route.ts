@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 
 
-const WAHA_URL = "https://34.75.49.98";
-const API_KEY = "b5d2364e1bcb47268dd820aa076c333f";
+const WAHA_URL = "https://api.grocerity.org";
+const API_KEY = process.env.WAHA_API_KEY
 
 export async function GET(request: Request) {
   try {
