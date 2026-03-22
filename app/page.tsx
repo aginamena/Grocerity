@@ -1,9 +1,9 @@
 "use client";
+
 import EmailIcon from "@mui/icons-material/Email";
 import FormatQuoteIcon from "@mui/icons-material/FormatQuote";
-import GroupIcon from "@mui/icons-material/Group";
-import SavingsIcon from "@mui/icons-material/Savings";
-import SpeedIcon from "@mui/icons-material/Speed";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
   Avatar,
   Box,
@@ -18,64 +18,31 @@ import {
 
 import SignupForm from "@/components/SignupForm";
 
-export default function ChecklistLandingPage() {
+export default function BoutiqueLandingPage() {
   const scrollToForm = () => {
     document
       .getElementById("signup-form")
       ?.scrollIntoView({ behavior: "smooth" });
   };
+
   const testimonials = [
     {
-      name: "Sarah Jenkins",
-      role: "E-commerce Owner",
-      image: "https://i.pravatar.cc/150?u=sarah", // Replace with real photo paths
-      text: "The blueprint changed everything. I used to spend 10 hours a week on social media. Now ChatGPT does it in minutes. Result: 40% increase in engagement and 10+ hours saved weekly.",
+      name: "Sarah",
+      role: "Boutique Owner",
+      text: "I used one of these captions and got more engagement than my last 10 posts combined.",
     },
     {
-      name: "Marcus Chen",
-      role: "Real Estate Agent",
-      image: "https://i.pravatar.cc/150?u=marcus",
-      text: "Mena's guide is genius. My weekly newsletters are automated and result in 3x more bookings. It’s like having a full-time assistant without the $4k/month salary.",
+      name: "Melissa",
+      role: "Online Boutique",
+      text: "These made posting so much easier. I don’t sit there stuck anymore.",
     },
     {
-      name: "Elena Rodriguez",
-      role: "Marketing Consultant",
-      image: "https://i.pravatar.cc/150?u=elena",
-      text: "Using these prompt techniques, I finish client work 3x faster. I’ve increased my client capacity by 50% while still getting my weekends back!",
+      name: "Jenna",
+      role: "Fashion Seller",
+      text: "Simple, but they actually work. I started getting more clicks and sales.",
     },
   ];
-  const stats = [
-    {
-      label: "Saves 5–10 hours/week for most users",
-      icon: <SpeedIcon sx={{ fontSize: 40, color: "#8b5cf6" }} />,
-    },
-    {
-      label: "Used by 347+ small business owners",
 
-      icon: <GroupIcon sx={{ fontSize: 40, color: "#8b5cf6" }} />,
-    },
-    {
-      label: "Cuts content creation time by ~60%",
-      icon: <SavingsIcon sx={{ fontSize: 40, color: "#8b5cf6" }} />,
-    },
-  ];
-  const steps = [
-    {
-      number: "01",
-      title: "Download the blueprint",
-      desc: "Enter your details to get instant access to the PDF guide.",
-    },
-    {
-      number: "02",
-      title: "Copy the prompts & setup",
-      desc: "Follow the step-by-step instructions to configure your ChatGPT.",
-    },
-    {
-      number: "03",
-      title: "Start automating your marketing",
-      desc: "Watch as ChatGPT handles your content and customer research.",
-    },
-  ];
   return (
     <Box
       sx={{
@@ -83,41 +50,34 @@ export default function ChecklistLandingPage() {
         background:
           "linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%)",
         color: "#fff",
-        py: { xs: 6, md: 10 },
+        pb: 10,
       }}
     >
-      <Container maxWidth="md">
-        {/* SECTION 1: HERO */}
-        <Stack
-          spacing={3}
-          alignItems="center"
-          sx={{ textAlign: "center", mb: 10 }}
-        >
+      {/* 🔥 HERO SECTION */}
+      <Box sx={{ py: { xs: 8, md: 12 }, textAlign: "center" }}>
+        <Container maxWidth="md">
           <Typography
             variant="h2"
             fontWeight="900"
             sx={{
-              fontSize: { xs: "2.5rem", md: "4rem" },
+              fontSize: { xs: "2.5rem", md: "4.2rem" },
               background: "linear-gradient(to right, #fff, #8b5cf6)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
+              lineHeight: 1.1,
+              mb: 3,
             }}
           >
-            How Small Businesses Use ChatGPT to Get More Customers—Without
-            Hiring
+            Stop Struggling to Write Captions—Get 30 Proven Captions That Will
+            Boost Your Sales Today!
           </Typography>
           <Typography
             variant="h5"
-            sx={{
-              color: "rgba(255, 255, 255, 0.7)",
-              lineHeight: 1.6,
-              maxWidth: "700px",
-            }}
+            sx={{ color: "rgba(255, 255, 255, 0.7)", mb: 5, lineHeight: 1.6 }}
           >
-            Stop doing everything yourself! Let ChatGPT handle the heavy lifting
-            while you focus on growing your business. From creating social media
-            content and writing blogs to supporting your marketing and
-            sales—there’s a smarter way to get it all done.
+            Stop guessing what to post. These plug-and-play captions are
+            designed to help you sell your products faster on Instagram, TikTok,
+            and Facebook.
           </Typography>
           <Button
             variant="contained"
@@ -126,61 +86,158 @@ export default function ChecklistLandingPage() {
             sx={{
               bgcolor: "#8b5cf6",
               px: 6,
-              py: 2,
-              fontSize: "1.1rem",
+              py: 2.5,
+              fontSize: "1.2rem",
               fontWeight: "bold",
               borderRadius: "50px",
-              boxShadow: "0 0 20px rgba(139, 92, 246, 0.4)",
+              boxShadow: "0 0 30px rgba(139, 92, 246, 0.4)",
               "&:hover": { bgcolor: "#7c3aed" },
             }}
           >
-            Get My Free Automation Blueprint Now
+            Get 30 Free Captions Now
           </Button>
-        </Stack>
 
-        <Grid container spacing={3} sx={{ mb: 10 }}>
-          {stats.map((stat, index) => (
-            <Grid size={{ xs: 12, sm: 4 }} key={index}>
+          {/* Proof Bar */}
+          <Grid container spacing={2} sx={{ mt: 8 }}>
+            {[
+              "Ready-to-post captions for your boutique",
+              "Designed to increase engagement & sales",
+              "Works for new arrivals, promos & everyday posts",
+            ].map((text, i) => (
+              <Grid size={{ xs: 12, md: 4 }} key={i}>
+                <Stack
+                  direction="row"
+                  spacing={1}
+                  justifyContent="center"
+                  alignItems="center"
+                >
+                  <CheckCircleOutlineIcon
+                    sx={{ color: "#8b5cf6", fontSize: 20 }}
+                  />
+                  <Typography
+                    variant="caption"
+                    sx={{ color: "rgba(255,255,255,0.6)", fontWeight: "bold" }}
+                  >
+                    {text.toUpperCase()}
+                  </Typography>
+                </Stack>
+              </Grid>
+            ))}
+          </Grid>
+        </Container>
+      </Box>
+
+      <Container maxWidth="md">
+        {/* 📦 WHAT THEY’RE GETTING */}
+        <Paper
+          sx={{
+            p: { xs: 4, md: 8 },
+            borderRadius: 8,
+            background: "rgba(255, 255, 255, 0.03)",
+            backdropFilter: "blur(10px)",
+            border: "1px solid rgba(139, 92, 246, 0.2)",
+            mb: 12,
+          }}
+        >
+          <Typography
+            variant="h4"
+            fontWeight="900"
+            textAlign="center"
+            sx={{ mb: 6 }}
+          >
+            What You’ll Get (Free)
+          </Typography>
+          <Grid container spacing={3}>
+            {[
+              "30 proven product captions you can copy & paste",
+              "Captions for new arrivals, low stock & flash sales",
+              "“Scroll-stopping” hooks that grab attention",
+              "Simple CTAs that turn views into orders",
+              "Works for clothing, accessories & fashion brands",
+            ].map((bullet, i) => (
+              <Grid size={{ xs: 12 }} key={i}>
+                <Stack direction="row" spacing={2} alignItems="center">
+                  <Box
+                    sx={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: "50%",
+                      bgcolor: "#8b5cf6",
+                    }}
+                  />
+                  <Typography variant="h6" sx={{ fontSize: "1.1rem" }}>
+                    {bullet}
+                  </Typography>
+                </Stack>
+              </Grid>
+            ))}
+          </Grid>
+        </Paper>
+
+        {/* 🧠 PAIN SECTION */}
+        <Box sx={{ mb: 12, textAlign: "center" }}>
+          <Typography
+            variant="h4"
+            fontWeight="900"
+            sx={{ mb: 4, color: "#ef4444" }}
+          >
+            Struggling to Know What to Post for Your Boutique?
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ color: "rgba(255,255,255,0.8)", mb: 4 }}
+          >
+            If you run a boutique, you’ve probably felt this:
+          </Typography>
+          <Stack
+            spacing={2}
+            sx={{ maxWidth: "600px", margin: "0 auto", textAlign: "left" }}
+          >
+            {[
+              "You have great products… but your posts don’t get much engagement",
+              "You don’t know what to write in your captions",
+              "You spend way too much time trying to come up with content",
+              "You’re posting—but it’s not turning into sales",
+            ].map((text, i) => (
               <Paper
-                elevation={0}
+                key={i}
                 sx={{
-                  p: 3,
-                  textAlign: "center",
-                  bgcolor: "rgba(255, 255, 255, 0.02)",
-                  border: "1px solid rgba(139, 92, 246, 0.1)",
-                  borderRadius: 4,
+                  p: 2,
+                  bgcolor: "rgba(239, 68, 68, 0.05)",
+                  border: "1px solid rgba(239, 68, 68, 0.1)",
+                  color: "#fca5a5",
                 }}
               >
-                {stat.icon}
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "rgba(255, 255, 255, 0.5)",
-                    textTransform: "uppercase",
-                    letterSpacing: 1,
-                  }}
-                >
-                  {stat.label}
-                </Typography>
+                <Typography>❌ {text}</Typography>
               </Paper>
-            </Grid>
-          ))}
-        </Grid>
-        <Box sx={{ mb: 10, textAlign: "center" }}>
-          <Typography variant="h5" fontWeight="bold" sx={{ mb: 4 }}>
-            What's Inside the Blueprint
+            ))}
+          </Stack>
+          <Typography
+            variant="h5"
+            fontWeight="bold"
+            sx={{ mt: 4, color: "#8b5cf6" }}
+          >
+            These captions fix that.
+          </Typography>
+        </Box>
+
+        {/* 👇 PRODUCT PREVIEW */}
+        <Box sx={{ mb: 12, textAlign: "center" }}>
+          <Typography variant="h4" fontWeight="900" sx={{ mb: 1 }}>
+            Preview of Your 30 Viral Captions
+          </Typography>
+          <Typography sx={{ color: "rgba(255,255,255,0.6)", mb: 4 }}>
+            Ready-to-use captions designed to help you sell more—without
+            overthinking your content.
           </Typography>
           <Paper
-            elevation={20}
+            elevation={24}
             sx={{
               maxWidth: "600px",
               margin: "0 auto",
-              position: "relative",
-              overflow: "hidden",
               borderRadius: 4,
-              border: "1px solid rgba(139, 92, 246, 0.3)",
-              background: "#fff",
-              p: 1,
+              overflow: "hidden",
+              position: "relative",
               cursor: "pointer",
             }}
             onClick={scrollToForm}
@@ -188,233 +245,153 @@ export default function ChecklistLandingPage() {
             <Box
               component="img"
               src="/sneakpeak.png"
-              alt="Blueprint Preview"
-              sx={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                filter: "blur(0.5px)",
-              }}
+              sx={{ width: "100%", filter: "blur(2px)" }}
             />
             <Box
               sx={{
                 position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: "50%",
-                background: "linear-gradient(to top, #0a0a0a, transparent)",
+                inset: 0,
                 display: "flex",
-                alignItems: "flex-end",
+                alignItems: "center",
                 justifyContent: "center",
-                pb: 4,
+                background: "rgba(0,0,0,0.4)",
               }}
             >
               <Button variant="contained" sx={{ bgcolor: "#8b5cf6" }}>
-                View Full PDF
+                VIEW FULL PDF
               </Button>
             </Box>
           </Paper>
         </Box>
-        <Divider sx={{ borderColor: "rgba(255,255,255,0.1)", mb: 6 }} />
-        {/* SECTION 3: BIO & FORM */}
+
+        {/* 👤 PERSONAL SECTION */}
         <Stack
           direction={{ xs: "column", md: "row" }}
-          spacing={6}
-          alignItems="flex-start"
-          sx={{ mb: 10 }}
+          spacing={8}
+          alignItems="center"
+          sx={{ mb: 12 }}
         >
-          <Box sx={{ flex: 1 }}>
+          <Box sx={{ flex: 1, textAlign: { xs: "center", md: "left" } }}>
             <Avatar
               src="/menaagina.jpg"
               sx={{
-                width: 180,
-                height: 180,
-                mb: 3,
+                width: 200,
+                height: 200,
+                mb: 4,
                 border: "4px solid #8b5cf6",
+                margin: { xs: "0 auto", md: "0 0 32px 0" },
               }}
             />
-            <Typography variant="h4" fontWeight="bold" gutterBottom>
-              Nice to meet you!
+            <Typography variant="h4" fontWeight="900" gutterBottom>
+              I Created This for Boutique Owners Who Want Simpler Marketing
             </Typography>
             <Typography
               sx={{ color: "rgba(255, 255, 255, 0.8)", lineHeight: 1.8 }}
             >
-              My name is <strong>Mena Agina</strong> and I’ve been using ChatGPT
-              since 2023 to automate content, marketing, and customer workflows.
-              This system now runs a large part of my business—and I built this
-              blueprint to help other small business owners do the same without
-              hiring expensive agencies or assistants.
+              I’ve worked with ChatGPT and content systems since 2023, helping
+              businesses create content faster and more consistently.
               <br />
               <br />
-              I'd like to share these strategies with you! Fill the form to get
-              your business automation blueprint.
+              But I noticed something: Boutique owners don’t need complicated
+              strategies. They just need captions that actually help them sell.
+              <br />
+              <br />
+              So I put together 30 captions you can use immediately to promote
+              your products and start seeing more engagement and sales.
             </Typography>
           </Box>
           <Box id="signup-form" sx={{ flex: 1, width: "100%" }}>
             <SignupForm />
           </Box>
         </Stack>
-        {/* HOW IT WORKS SECTION */}
+
+        {/* ⚡ HOW IT WORKS */}
         <Box sx={{ mb: 12, textAlign: "center" }}>
-          <Typography variant="h4" fontWeight="bold" sx={{ mb: 6 }}>
+          <Typography variant="h4" fontWeight="900" sx={{ mb: 8 }}>
             How it works
           </Typography>
           <Grid container spacing={4}>
-            {steps.map((step, index) => (
-              <Grid size={{ xs: 12, md: 4 }} key={index}>
-                <Stack spacing={2} alignItems="center">
-                  <Box
-                    sx={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: "50%",
-                      border: "2px solid #8b5cf6",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "#8b5cf6",
-                      fontWeight: "bold",
-                      fontSize: "1.2rem",
-                      background: "rgba(139, 92, 246, 0.1)",
-                    }}
+            {[
+              { t: "Download the captions", d: "Get instant access to all 30" },
+              {
+                t: "Copy & paste",
+                d: "Use them for your posts (takes seconds)",
+              },
+              {
+                t: "Start getting more sales",
+                d: "No more guessing what to write",
+              },
+            ].map((step, i) => (
+              <Grid size={{ xs: 12, md: 4 }} key={i}>
+                <Box
+                  sx={{
+                    p: 4,
+                    bgcolor: "rgba(139, 92, 246, 0.05)",
+                    border: "1px solid rgba(139, 92, 246, 0.1)",
+                    borderRadius: 6,
+                  }}
+                >
+                  <Typography
+                    variant="h3"
+                    fontWeight="900"
+                    sx={{ color: "#8b5cf6", mb: 2 }}
                   >
-                    {step.number}
-                  </Box>
-                  <Typography variant="h6" fontWeight="bold">
-                    {step.title}
+                    0{i + 1}
+                  </Typography>
+                  <Typography variant="h6" fontWeight="bold" gutterBottom>
+                    {step.t}
                   </Typography>
                   <Typography
                     variant="body2"
-                    sx={{ color: "rgba(255, 255, 255, 0.6)" }}
+                    sx={{ color: "rgba(255,255,255,0.6)" }}
                   >
-                    {step.desc}
+                    {step.d}
                   </Typography>
-                </Stack>
+                </Box>
               </Grid>
             ))}
           </Grid>
         </Box>
-        <Divider sx={{ borderColor: "rgba(255,255,255,0.1)", mb: 6 }} />
-        {/* SECTION 2: THE VALUE PROP */}
-        <Paper
-          sx={{
-            p: { xs: 4, md: 6 },
-            borderRadius: 6,
-            background: "rgba(255, 255, 255, 0.03)",
-            backdropFilter: "blur(10px)",
-            border: "1px solid rgba(139, 92, 246, 0.2)",
-            mb: 10,
-          }}
-        >
-          <Stack spacing={4}>
-            <Typography variant="h4" fontWeight="bold" textAlign="center">
-              Ready to automate your growth?
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{ color: "rgba(255, 255, 255, 0.8)", fontSize: "1.1rem" }}
-            >
-              I've created a Business Automation Blueprint for you to be able to
-              automate your content creation. Click on the button below to
-              download the Business Automation Blueprint.
-            </Typography>
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={scrollToForm}
-              sx={{
-                borderColor: "#8b5cf6",
-                color: "#fff",
-                py: 1.5,
-                "&:hover": {
-                  borderColor: "#7c3aed",
-                  bgcolor: "rgba(139, 92, 246, 0.1)",
-                },
-              }}
-            >
-              Get My Free Automation Blueprint Now
-            </Button>
-          </Stack>
-        </Paper>
-        <Box sx={{ mb: 10, textAlign: "center" }}>
-          <Typography variant="h5" fontWeight="bold" sx={{ mb: 4 }}>
-            What's Inside the Blueprint
+
+        {/* 🚨 MID-PAGE CTA */}
+        <Box sx={{ mb: 12, textAlign: "center" }}>
+          <Typography variant="h4" fontWeight="900" mb={2}>
+            Stop Overthinking Your Captions
           </Typography>
-          <Paper
-            elevation={20}
-            sx={{
-              maxWidth: "600px",
-              margin: "0 auto",
-              position: "relative",
-              overflow: "hidden",
-              borderRadius: 4,
-              border: "1px solid rgba(139, 92, 246, 0.3)",
-              background: "#fff",
-              p: 1,
-              cursor: "pointer",
-            }}
+          <Typography sx={{ color: "rgba(255,255,255,0.7)", mb: 4 }}>
+            You already have the products. Now you just need the words that help
+            them sell.
+          </Typography>
+          <Button
+            variant="contained"
+            size="large"
             onClick={scrollToForm}
+            sx={{ bgcolor: "#8b5cf6", px: 6, py: 2, borderRadius: 10 }}
           >
-            <Box
-              component="img"
-              src="/sneakpeak.png"
-              alt="Blueprint Preview"
-              sx={{
-                width: "100%",
-                height: "auto",
-                display: "block",
-                filter: "blur(0.5px)",
-              }}
-            />
-            <Box
-              sx={{
-                position: "absolute",
-                bottom: 0,
-                left: 0,
-                right: 0,
-                height: "50%",
-                background: "linear-gradient(to top, #0a0a0a, transparent)",
-                display: "flex",
-                alignItems: "flex-end",
-                justifyContent: "center",
-                pb: 4,
-              }}
-            >
-              <Button variant="contained" sx={{ bgcolor: "#8b5cf6" }}>
-                View Full PDF
-              </Button>
-            </Box>
-          </Paper>
+            Get My 30 Free Boutique Captions
+          </Button>
         </Box>
 
-        <Divider sx={{ borderColor: "rgba(255,255,255,0.1)", mb: 6 }} />
+        {/* 💬 TESTIMONIALS */}
+        <Divider sx={{ borderColor: "rgba(255,255,255,0.1)", mb: 8 }} />
         <Box sx={{ mb: 12 }}>
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            textAlign="center"
-            sx={{ mb: 6 }}
-          >
-            What other small business owners are saying
+          <Typography variant="h4" fontWeight="900" textAlign="center" mb={6}>
+            What other boutique owners are saying
           </Typography>
           <Grid container spacing={4}>
-            {testimonials.map((t, index) => (
-              <Grid size={{ xs: 12, md: 4 }} key={index}>
+            {testimonials.map((t, i) => (
+              <Grid size={{ xs: 12, md: 4 }} key={i}>
                 <Paper
                   sx={{
                     p: 4,
                     height: "100%",
-                    bgcolor: "rgba(139, 92, 246, 0.05)",
-                    border: "1px solid rgba(139, 92, 246, 0.1)",
-                    borderRadius: 4,
-                    display: "flex",
-                    flexDirection: "column",
-                    position: "relative",
+                    bgcolor: "rgba(255,255,255,0.02)",
+                    border: "1px solid rgba(255,255,255,0.05)",
+                    borderRadius: 6,
                   }}
                 >
                   <FormatQuoteIcon
-                    sx={{ color: "#8b5cf6", fontSize: 40, opacity: 0.5, mb: 1 }}
+                    sx={{ color: "#8b5cf6", fontSize: 40, mb: 2 }}
                   />
                   <Typography
                     variant="body1"
@@ -422,48 +399,80 @@ export default function ChecklistLandingPage() {
                       color: "rgba(255,255,255,0.9)",
                       fontStyle: "italic",
                       mb: 3,
-                      flexGrow: 1,
                     }}
                   >
                     "{t.text}"
                   </Typography>
-                  <Avatar
-                    src={t.image}
-                    sx={{ width: 48, height: 48, border: "2px solid #8b5cf6" }}
-                  />
-                  <Box sx={{ mt: "auto" }}>
-                    <Typography
-                      variant="subtitle1"
-                      fontWeight="bold"
-                      sx={{ color: "#8b5cf6" }}
-                    >
-                      {t.name}
-                    </Typography>
-                    <Typography
-                      variant="caption"
-                      sx={{ color: "rgba(255,255,255,0.5)" }}
-                    >
-                      {t.role}
-                    </Typography>
-                  </Box>
+                  <Typography
+                    variant="subtitle1"
+                    fontWeight="bold"
+                    sx={{ color: "#8b5cf6" }}
+                  >
+                    — {t.name}, {t.role}
+                  </Typography>
                 </Paper>
               </Grid>
             ))}
           </Grid>
         </Box>
 
-        <Divider sx={{ borderColor: "rgba(255,255,255,0.1)", mb: 6 }} />
-
-        {/* SECTION 4: CONTACT */}
-        <Stack alignItems="center" spacing={2} sx={{ textAlign: "center" }}>
-          <Typography variant="body1" sx={{ color: "rgba(255,255,255,0.6)" }}>
-            I'd really like to get to know you and the type of business you're
-            running. Let's chat!
+        {/* 🧲 FINAL CTA */}
+        <Box
+          sx={{
+            p: { xs: 6, md: 10 },
+            textAlign: "center",
+            bgcolor: "#8b5cf6",
+            borderRadius: 8,
+            boxShadow: "0 20px 50px rgba(139, 92, 246, 0.3)",
+          }}
+        >
+          <Typography variant="h3" fontWeight="900" color="#fff" gutterBottom>
+            Want More Sales From Your Boutique Posts?
+          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ color: "rgba(255,255,255,0.9)", mb: 6 }}
+          >
+            Start using captions that are designed to convert—without spending
+            hours thinking about what to write.
           </Typography>
           <Button
+            variant="contained"
+            size="large"
+            onClick={scrollToForm}
+            endIcon={<ArrowForwardIcon />}
+            sx={{
+              bgcolor: "#fff",
+              color: "#8b5cf6",
+              px: 6,
+              py: 2.5,
+              fontSize: "1.2rem",
+              fontWeight: "900",
+              borderRadius: "50px",
+              "&:hover": { bgcolor: "#f3f4f6" },
+            }}
+          >
+            Get 30 Free Viral Product Captions
+          </Button>
+        </Box>
+
+        {/* Footer info */}
+        <Stack
+          alignItems="center"
+          sx={{ mt: 10, textAlign: "center", opacity: 0.5 }}
+        >
+          <Typography variant="caption">
+            I'd really like to get to know you and the type of business you're
+            running. You can email me at the address below
+          </Typography>
+          <Button
+            size="small"
+            sx={{
+              color: "#fff",
+              textTransform: "none",
+              textDecoration: "underline",
+            }}
             href="mailto:aginamena5@gmail.com"
-            startIcon={<EmailIcon />}
-            sx={{ color: "#8b5cf6", textTransform: "none", fontSize: "1.1rem" }}
           >
             aginamena5@gmail.com
           </Button>
