@@ -68,16 +68,15 @@ export default function BoutiqueLandingPage() {
               mb: 3,
             }}
           >
-            Stop Struggling to Write Captions—Get 30 Proven Captions That Will
-            Boost Your Sales Today!
+            Stop writing social media captions that do not sell your products
+            fast to customers!
           </Typography>
           <Typography
             variant="h5"
             sx={{ color: "rgba(255, 255, 255, 0.7)", mb: 5, lineHeight: 1.6 }}
           >
-            Stop guessing what to post. These plug-and-play captions are
-            designed to help you sell your products faster on Instagram, TikTok,
-            and Facebook.
+            These plug-and-play captions are designed to help you sell your
+            products faster on Instagram, TikTok, and Facebook.
           </Typography>
           <Button
             variant="contained"
@@ -194,10 +193,9 @@ export default function BoutiqueLandingPage() {
             sx={{ maxWidth: "600px", margin: "0 auto", textAlign: "left" }}
           >
             {[
-              "You have great products… but your posts don’t get much engagement",
-              "You don’t know what to write in your captions",
-              "You spend way too much time trying to come up with content",
               "You’re posting—but it’s not turning into sales",
+              "You have great products… but your posts don’t get much engagement",
+              "You spend way too much time trying to come up with content",
             ].map((text, i) => (
               <Paper
                 key={i}

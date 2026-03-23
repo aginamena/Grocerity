@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ThemeRegistry from "@/components/ThemeRegistry";
-import NavigationBar from "@/components/NavigationBar";
+// import NavigationBar from "@/components/NavigationBar";
 
 export const metadata: Metadata = {
   title: "Grocerity",
-  description: "Automate your posting on whatsapp groups with Grocerity",
+  description:
+    "Grocerity is a platform that helps boutique owners automate their business, allowing them to focus on higher-level activities while lower-level tasks are handled automatically.",
 };
 
 export default function RootLayout({
@@ -32,7 +33,7 @@ export default function RootLayout({
       </head>
       <body suppressHydrationWarning>
         <ThemeRegistry>
-          <NavigationBar />
+          {/* <NavigationBar /> */}
           {children}
         </ThemeRegistry>
       </body>
