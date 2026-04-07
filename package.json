@@ -27,12 +27,15 @@
     "canvas-confetti": "^1.9.4",
     "eslint-config-next": "^16.1.4",
     "next": "^16.1.4",
+    "openai": "^6.33.0",
     "opik": "^1.9.98",
+    "playwright": "^1.59.1",
     "prettier": "^3.8.1",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "remotion": "^4.0.407",
     "three": "^0.182.0",
+    "ws": "^8.20.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {

@@ -4,9 +4,9 @@ import ThemeRegistry from "@/components/ThemeRegistry";
 // import NavigationBar from "@/components/NavigationBar";
 
 export const metadata: Metadata = {
-  title: "Grocerity",
+  title: "AI Made Simple",
   description:
-    "Grocerity is a platform that helps boutique owners automate their business, allowing them to focus on higher-level activities while lower-level tasks are handled automatically.",
+    "Unlock the power of AI with our free guide and 7-day plan. Learn how to use AI tools effectively and boost your productivity today!",
 };
 
 export default function RootLayout({
