@@ -1,12 +1,11 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import ThemeRegistry from "@/components/ThemeRegistry";
-// import NavigationBar from "@/components/NavigationBar";
 
 export const metadata: Metadata = {
-  title: "AI Made Simple",
+  title: "Grocerity",
   description:
-    "Unlock the power of AI with our free guide and 7-day plan. Learn how to use AI tools effectively and boost your productivity today!",
+    "Record conversations, generate notes, and focus on patient care instead of documentation",
 };
 
 export default function RootLayout({
@@ -32,10 +31,7 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
-        <ThemeRegistry>
-          {/* <NavigationBar /> */}
-          {children}
-        </ThemeRegistry>
+        <ThemeRegistry>{children}</ThemeRegistry>
       </body>
     </html>
   );
