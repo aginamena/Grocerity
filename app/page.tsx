@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import { Mic } from "@mui/icons-material";
 
+type SpeechRecognition = any;
+
 export default function Home() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [patientName, setPatientName] = useState("");
@@ -386,10 +388,35 @@ export default function Home() {
           </Box>
         )}
       </Box>
-
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)}>
-        <DialogTitle>Enter patient name</DialogTitle>
-        <DialogContent>
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: { xs: 0, sm: 8 },
+            margin: { xs: 0, sm: 2 },
+            width: { xs: "100%", sm: "auto" },
+            height: { xs: "100%", sm: "auto" },
+          },
+        }}
+      >
+        <DialogTitle
+          sx={{
+            fontSize: { xs: "1.25rem", sm: "1.5rem" },
+            textAlign: "center",
+            pb: 1,
+          }}
+        >
+          Enter patient name
+        </DialogTitle>
+        <DialogContent
+          sx={{
+            px: { xs: 3, sm: 3 },
+            py: 1,
+          }}
+        >
           <TextField
             autoFocus
             margin="dense"
@@ -398,17 +425,44 @@ export default function Home() {
             fullWidth
             value={patientName}
             onChange={(e) => setPatientName(e.target.value)}
+            sx={{
+              "& .MuiInputLabel-root": {
+                fontSize: { xs: "0.875rem", sm: "1rem" },
+              },
+              "& .MuiInputBase-input": {
+                fontSize: { xs: "1rem", sm: "1rem" },
+              },
+            }}
           />
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 2 }}>
-          <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+        <DialogActions
+          sx={{
+            flexDirection: { xs: "column", sm: "row" },
+            gap: 1,
+            px: { xs: 3, sm: 3 },
+            pb: { xs: 3, sm: 2 },
+          }}
+        >
+          <Button
+            onClick={() => setDialogOpen(false)}
+            fullWidth
+            sx={{
+              order: { xs: 2, sm: 1 },
+              fontSize: { xs: "0.875rem", sm: "1rem" },
+            }}
+          >
+            Cancel
+          </Button>
           <Button
             variant="contained"
             onClick={handleConfirmRecording}
             disabled={!patientName.trim()}
+            fullWidth
             sx={{
+              order: { xs: 1, sm: 2 },
               backgroundColor: "success.main",
               "&:hover": { backgroundColor: "success.dark" },
+              fontSize: { xs: "0.875rem", sm: "1rem" },
             }}
           >
             Start Recording Now
