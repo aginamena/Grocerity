@@ -139,7 +139,7 @@ export default function Home() {
     recognition.interimResults = true;
     recognition.lang = "en-US";
 
-    recognition.onresult = (event: SpeechRecognitionEvent) => {
+    recognition.onresult = (event: SpeechRecognition) => {
       let finalText = "";
 
       for (let i = event.resultIndex; i < event.results.length; i++) {
